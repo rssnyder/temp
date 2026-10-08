@@ -13,6 +13,8 @@ This Template will create the following resources:
 
 Both templates can be provisioned at the Account, Organization, or Project level by setting `organization_id` / `project_id`.
 
+_Note: In the IDP workflow (`.harness/catalog_template.yaml`), picking "Organization" scope shows a plain Organization picker. Picking "Project" scope ignores that field and instead derives the Organization automatically from the selected Project (via a hidden auto-org field), so org/project can never be mismatched. All fields are always visible in the form; only the ones relevant to the chosen scope are sent to Terraform._
+
 ## Providers
 This template is designed to be used as a Terraform Module. To leverage this module, an Harness provider configuration must be added to the calling template as defined by the [Harness Provider - Docs](https://registry.terraform.io/providers/harness/harness/latest/docs).
 

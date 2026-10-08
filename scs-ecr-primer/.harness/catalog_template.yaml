@@ -48,41 +48,27 @@ spec:
             - Deploy at Account Level (Maximum Reusability)
             - Deploy at Organization Level (Org-specific Templates)
             - Deploy at Project Level (Project-specific Templates)
-      dependencies:
-        template_deployment_scope:
-          allOf:
-            - if:
-                properties:
-                  template_deployment_scope:
-                    const: "organization"
-              then:
-                required:
-                  - organization_id
-                properties:
-                  organization_id:
-                    $ref: "#/hierarchy/organization_id"
-            - if:
-                properties:
-                  template_deployment_scope:
-                    const: "project"
-              then:
-                required:
-                  - organization_id
-                  - project_id
-                properties:
-                  organization_id:
-                    $ref: "#/hierarchy/organization_id"
-                  project_id:
-                    $ref: "#/hierarchy/project_id"
-      hierarchy:
         organization_id:
-          title: Organization ID for Template Deployment
+          title: Organization
           type: string
-          description: Enter the Organization ID where the templates should be deployed
+          description: Used when Template Deployment Scope is "Organization". Ignored otherwise.
+          ui:field: HarnessOrgPicker
+          default: Choose One
         project_id:
-          title: Project ID for Template Deployment
+          title: Project
           type: string
-          description: Enter the Project ID where the templates should be deployed
+          description: Used when Template Deployment Scope is "Project". The Organization is derived automatically from the selected Project to avoid mismatched org/project pairs. Ignored otherwise.
+          ui:field: HarnessProjectPicker
+          default: Choose One
+        project_organization_id:
+          title: Project Organization (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:widget: hidden
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'project_id'
     - title: Solutions Factory Connection
       properties:
         solutions_factory_details:
@@ -187,7 +173,7 @@ spec:
           GIT_REPOSITORY_BRANCH: ${{ parameters.solutions_factory_details.template_library_branch }}
           GIT_REPOSITORY_PATH: ${{ parameters.solutions_factory_details.template_library_directory }}
           # The RESOURCE_NAME must be unique for each workspace created.
-          RESOURCE_NAME: ${{ parameters.organization_id }}_SCS_ECR
+          RESOURCE_NAME: ${{ (parameters.organization_id + "_") if parameters.template_deployment_scope == "organization" else ("" if parameters.template_deployment_scope == "account" else (parameters.project_id + "_")) }}SCS_ECR
           RESOURCE_OWNER: group:default/HSF_Admins
           # YAML of Terraform variables of type 'String' mapped to their IDP parameters
           RESOURCE_VARS:
@@ -196,7 +182,9 @@ spec:
             # -----------
             # Controls where templates are deployed in Harness hierarchy
             ################################################
-            organization_id: ${{ parameters.organization_id if parameters.template_deployment_scope != "account" else null }}
+            # Account scope: both null. Organization scope: the manually picked org. Project scope: the
+            # org auto-derived from the Project picker, so org/project can never be mismatched.
+            organization_id: ${{ parameters.organization_id if parameters.template_deployment_scope == "organization" else ( parameters.project_organization_id if parameters.template_deployment_scope == "project" else null ) }}
             project_id: ${{ parameters.project_id if parameters.template_deployment_scope == "project" else null }}
           # YAML of Terraform variables of type 'Secret' Reference mapped to their IDP parameters
           RESOURCE_VARS_SECRETS: {}
