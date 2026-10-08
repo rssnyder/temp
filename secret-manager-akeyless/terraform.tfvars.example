@@ -16,4 +16,4 @@ project_id = null
 template_name = "Akeyless"
 
 # [Required] Version strings for the template
-template_version = "1.0"
+template_version = "v1"

@@ -38,7 +38,7 @@ spec:
           title: Template Version
           type: string
           description: What should the step template's initial version be
-          default: "1.0"
+          default: "v1"
         template_location:
           title: Template Location
           type: string
@@ -221,4 +221,4 @@ spec:
     text:
       - title: Outputs
         content: |
-          Step Template: ${{ parameters.solutions_factory_details.harness_account_url }}/ng/account/${{ parameters.solutions_factory_details.harness_account_id }}/all${{ ("/orgs/" + parameters.org_id) if parameters.org_id else "" }}${{ ("/projects/" + parameters.project_id) if parameters.project_id else "" }}/settings/templates/${{ parameters.template_name|replace(" ","_")|replace("-","_") }}/template-studio/SecretManager/?versionLabel=${{ parameters.template_version }}
+          Step Template: ${{ steps.configure_workspace.output['pipeline.stages.Provision.spec.execution.steps.Provision.steps.apply.output.outputVariables.step_template_url']}}
