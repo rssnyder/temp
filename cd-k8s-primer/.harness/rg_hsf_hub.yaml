@@ -1,0 +1,14 @@
+---
+########################
+# Harness Resource Group Management
+#
+# The ResourceGroup name
+# When creating a new Harness ResourceGroup, the following is used:
+# - name = The name of this file. Hyphens and underscores are converted into spaces
+# - identifier = The name of this file. Hyphens and spaces are converted into underscores
+########################
+id: cdk8sprimer
+resource_filters:
+  - type: PIPELINE
+    identifiers:
+      - "cdk8sprimer"

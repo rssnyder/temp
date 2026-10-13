@@ -1,0 +1,78 @@
+template:
+  identifier: ${TEMPLATE_IDENTIFIER}
+  name: ${TEMPLATE_NAME}
+  %{~ if ORGANIZATION_ID != null ~}
+  orgIdentifier: ${ORGANIZATION_ID}
+  %{~ endif ~}
+  %{~ if PROJECT_ID != null ~}
+  projectIdentifier: ${PROJECT_ID}
+  %{~ endif ~}
+  description: "${TEMPLATE_DESC}"
+  versionLabel: "${TEMPLATE_VERSION}"
+  tags:
+    module: CD
+  type: Pipeline
+  spec:
+    stages:
+      - stage:
+          name: Deploy to Dev
+          identifier: Deploy_to_Dev
+          template:
+            templateRef: ${STAGE_TEMPLATE_ID}
+            versionLabel: "${STAGE_TEMPLATE_VERSION}"
+            templateInputs:
+              type: Deployment
+              spec:
+                service:
+                  serviceRef: <+input>
+                environment:
+                  environmentRef: <+input>
+                  infrastructureDefinitions: <+input>
+      - stage:
+          name: Deploy to Test
+          identifier: Deploy_to_Test
+          template:
+            templateRef: ${STAGE_TEMPLATE_ID}
+            versionLabel: "${STAGE_TEMPLATE_VERSION}"
+            templateInputs:
+              type: Deployment
+              spec:
+                service:
+                  serviceRef: <+input>
+                environment:
+                  environmentRef: <+input>
+                  infrastructureDefinitions: <+input>
+      - stage:
+          name: Approval
+          identifier: Approval
+          type: Approval
+          spec:
+            execution:
+              steps:
+                - step:
+                    name: Approve Production Deployment
+                    identifier: Approve_Production_Deployment
+                    type: HarnessApproval
+                    timeout: 1d
+                    spec:
+                      approvalMessage: Please review and approve the deployment to Production
+                      includePipelineExecutionHistory: true
+                      approvers:
+                        userGroups: <+input>
+                        minimumCount: 1
+                        disallowPipelineExecutor: false
+                      isAutoRejectEnabled: false
+      - stage:
+          name: Deploy to Prod
+          identifier: Deploy_to_Prod
+          template:
+            templateRef: ${STAGE_TEMPLATE_ID}
+            versionLabel: "${STAGE_TEMPLATE_VERSION}"
+            templateInputs:
+              type: Deployment
+              spec:
+                service:
+                  serviceRef: <+input>
+                environment:
+                  environmentRef: <+input>
+                  infrastructureDefinitions: <+input>

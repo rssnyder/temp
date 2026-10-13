@@ -1,0 +1,26 @@
+# [Optional] Enter the Harness Platform URL.  Defaults to Harness SaaS URL
+harness_platform_url = "https://app.harness.io/gateway"
+
+# [Required] Enter the Harness Platform Account Number
+harness_platform_account = # Required
+
+# [Optional] Provide a Map of Tags to associate with the resources
+tags = {}
+
+# [Optional] Existing Organization/Project ID. Leave null for Account level.
+organization_id = null
+project_id      = null
+
+# [Optional] Override the standard Helm chart URL. Leave null to use the Harness default chart.
+helm_chart_override_url = null
+
+# [Optional] Delegate selectors for the Helm chart connector
+helm_connector_delegate_selectors = []
+
+# [Optional] Credentials for the Helm chart connector. Leave null for anonymous access.
+helm_connector_username     = null
+helm_connector_password_ref = null
+
+# [Optional] Raw YAML content of a customer-provided base Helm values file. Leave null to use the bundled default.
+base_values_override_content = null
+

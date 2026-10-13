@@ -1,0 +1,10 @@
+# Default base Helm values for the CD K8s Primer standard chart.
+# Replace via the `base_values_override_path` variable to use a customer chart's values instead.
+deployment:
+  image:
+    repository: <+artifacts.primary.image.split(":")[0]>
+    tag: <+artifacts.primary.image.split(":")[1]>
+  containerSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    readOnlyRootFilesystem: true

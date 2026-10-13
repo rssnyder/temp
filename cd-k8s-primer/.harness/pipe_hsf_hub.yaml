@@ -1,0 +1,128 @@
+pipeline:
+  name: CD K8s Primer
+  identifier: cdk8sprimer
+  orgIdentifier: ${ORGANIZATION_ID}
+  projectIdentifier: ${PROJECT_ID}
+  description: Create the enterprise Kubernetes CD stage/pipeline templates and standard Helm chart connector
+  tags: {
+    pipeline_type: platform_management
+  }
+  stages:
+    - stage:
+        name: Create_Manage_Workspace
+        identifier: Create_Manage_Workspace
+        description: ""
+        type: Pipeline
+        spec:
+          org: ${WORKSPACE_MGMT_ORG_ID}
+          project: ${WORKSPACE_MGMT_PROJECT_ID}
+          pipeline: ${WORKSPACE_MGMT_PIPELINE_ID}
+          inputs:
+            identifier: ${WORKSPACE_MGMT_PIPELINE_ID}
+            variables:
+              - name: RESOURCE_NAME
+                type: String
+                value: cd_k8s_primer<+pipeline.variables.organization_id><+pipeline.variables.project_id>
+              - name: RESOURCE_OWNER
+                type: String
+                value: user:account/<+pipeline.triggeredBy.email>
+              - name: RESOURCE_VARS
+                type: String
+                value: |-
+                  {
+                    "harness_platform_account":"<+account.identifier>",
+                    "organization_id":"<+pipeline.variables.organization_id>",
+                    "project_id":"<+pipeline.variables.project_id>",
+                    "helm_chart_override_url":"<+pipeline.variables.helm_chart_override_url>",
+                    "helm_connector_username":"<+pipeline.variables.helm_connector_username>",
+                    "base_values_override_content":"<+pipeline.variables.base_values_override_content>"
+                  }
+              - name: RESOURCE_VARS_SECRETS
+                type: String
+                value: |-
+                  {
+                    "helm_connector_password_ref":"<+pipeline.variables.helm_connector_password_ref>"
+                  }
+              - name: RESOURCE_VARS_ENVS
+                type: String
+                value: "{}"
+              - name: RESOURCE_VARS_ENVS_SECRET
+                type: String
+                value: "{}"
+              - name: GIT_REPOSITORY_BRANCH
+                type: String
+                value: main
+              - name: GIT_REPOSITORY_CONNECTOR
+                type: String
+                value: <+variable.account.custom_template_library_connector>
+              - name: GIT_REPOSITORY_NAME
+                type: String
+                value: <+variable.account.custom_template_library_repo>
+              - name: GIT_REPOSITORY_PATH
+                type: String
+                value: cd-k8s-primer
+              - name: IAC_PROVISIONER_TYPE
+                type: String
+                value: opentofu
+              - name: IAC_PROVISIONER_VERSION
+                type: String
+                value: 1.10.0
+              - name: IAC_PROVIDER_CONNECTOR
+                type: String
+                value: ""
+              - name: INCLUDE_HARNESS_ENVS
+                type: String
+                value: "true"
+              - name: REGISTER_IDP
+                type: String
+                value: "${SHOULD_USE_HARNESS_IDP}"
+              - name: IS_EPHEMERAL
+                type: String
+                value: "false"
+              - name: REQUIRES_APPROVAL
+                type: String
+                value: "false"
+              - name: WORKSPACE_ORG
+                type: String
+                value: Harness_Platform_Management
+              - name: WORKSPACE_PROJECT
+                type: String
+                value: Solutions_Factory
+              - name: WORKSPACE_TAGS
+                type: String
+                value: |-
+                  {
+                    "source":"custom",
+                    "type":"cd-k8s-primer"
+                  }
+  variables:
+    - name: organization_id
+      type: String
+      description: If the templates should be deployed into an Organization or Project, then provide the existing Organization ID here
+      required: false
+      value: <+input>.regex(^([a-zA-Z][_a-zA-Z0-9]*)$)
+    - name: project_id
+      type: String
+      description: If the templates should be deployed into a Project, then provide the existing Project ID here
+      required: false
+      value: <+input>.regex(^([a-zA-Z][_a-zA-Z0-9]*)$)
+    - name: helm_chart_override_url
+      type: String
+      description: Optional URL of your own "standard helm chart" to use instead of the Harness default chart
+      required: false
+      value: <+input>
+    - name: helm_connector_username
+      type: String
+      description: Optional username for the Helm chart connector
+      required: false
+      value: <+input>
+    - name: helm_connector_password_ref
+      type: String
+      description: Optional secret reference for the Helm chart connector password
+      required: false
+      value: <+input>
+    - name: base_values_override_content
+      type: String
+      description: Optional raw YAML content for the base Helm values override
+      required: false
+      value: <+input>
