@@ -164,7 +164,7 @@ spec:
               # Determines if the workflow will trigger a temporary workspace that is
               # deleted upon completion. Resources will be preserved
               # Must be "true" or "false" and wrapped in quotes
-              default: "true"
+              default: "false"
               ui:widget: hidden
             requires_approval:
               type: string
