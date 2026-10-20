@@ -1,0 +1,27 @@
+# [Optional] Enter the Harness Platform URL.  Defaults to Harness SaaS URL
+harness_platform_url = "https://app.harness.io/gateway"
+
+# [Required] Enter the Harness Platform Account Number
+harness_platform_account = # Required
+
+# [Optional] Provide a Map of Tags to associate with the resources
+tags = {}
+
+# [Required] Azure Subscription IDs to create CCM member connectors for.
+# Accepts a comma-separated list and/or one subscription ID per line.
+subscription_ids = # Required e.g. "00000000-0000-0000-0000-000000000000,11111111-1111-1111-1111-111111111111" or <<-EOT
+                    # 00000000-0000-0000-0000-000000000000
+                    # 11111111-1111-1111-1111-111111111111
+                    # EOT
+
+# [Required] Azure Active Directory Tenant ID shared by all subscriptions
+tenant_id = # Required
+
+# [Optional] CCM features to enable on each member connector. Valid values: OPTIMIZATION, VISIBILITY, GOVERNANCE
+features_enabled = ["OPTIMIZATION", "VISIBILITY"]
+
+# [Optional] Prefix used to build each connector's identifier/name
+connector_name_prefix = "azure_ccm_member"
+
+# [Optional] Description applied to every created connector
+description = ""
