@@ -1,0 +1,30 @@
+# [Optional] Enter the Harness Platform URL.  Defaults to Harness SaaS URL
+harness_platform_url = "https://app.harness.io/gateway"
+
+# [Required] Enter the Harness Platform Account Number
+harness_platform_account = # Required
+
+# [Optional] Provide a Map of Tags to associate with the resources
+tags = {}
+
+# [Required] AWS Account IDs to create AWS Cloud Cost member connectors for.
+# Accepts a comma-separated list and/or one account ID per line.
+aws_account_ids = # Required e.g. "111111111111,222222222222" or <<-EOT
+                  # 111111111111
+                  # 222222222222
+                  # EOT
+
+# [Required] Name of the standard cross-account IAM role deployed in every member account
+cross_account_role_name = # Required e.g. "HarnessCCMRole"
+
+# [Required] External ID configured on the cross-account IAM role's trust policy
+external_id = # Required
+
+# [Optional] CCM features to enable on each member connector. Valid values: OPTIMIZATION, VISIBILITY, GOVERNANCE
+features_enabled = ["OPTIMIZATION", "VISIBILITY"]
+
+# [Optional] Prefix used to build each connector's identifier/name
+connector_name_prefix = "aws_ccm_member"
+
+# [Optional] Description applied to every created connector
+description = ""
