@@ -1,0 +1,131 @@
+pipeline:
+  name: CCM AWS Member Connectors
+  identifier: ccmawsmemberconnectors
+  orgIdentifier: ${ORGANIZATION_ID}
+  projectIdentifier: ${PROJECT_ID}
+  description: Create AWS Cloud Cost Management member connectors for a list of AWS accounts, using a shared cross-account IAM role name
+  tags: {
+    pipeline_type: ccm
+  }
+  stages:
+    - stage:
+        name: Create_Manage_Workspace
+        identifier: Create_Manage_Workspace
+        description: ""
+        type: Pipeline
+        spec:
+          org: ${WORKSPACE_MGMT_ORG_ID}
+          project: ${WORKSPACE_MGMT_PROJECT_ID}
+          pipeline: ${WORKSPACE_MGMT_PIPELINE_ID}
+          inputs:
+            identifier: ${WORKSPACE_MGMT_PIPELINE_ID}
+            variables:
+              - name: RESOURCE_NAME
+                type: String
+                value: ccm_aws_member_connectors
+              - name: RESOURCE_OWNER
+                type: String
+                value: user:account/<+pipeline.triggeredBy.email>
+              - name: RESOURCE_VARS
+                type: String
+                value: |-
+                  {
+                    "aws_account_ids":"<+pipeline.variables.aws_account_ids>",
+                    "cross_account_role_name":"<+pipeline.variables.cross_account_role_name>",
+                    "external_id":"<+pipeline.variables.external_id>",
+                    "features_enabled":<+pipeline.variables.features_enabled>,
+                    "connector_name_prefix":"<+pipeline.variables.connector_name_prefix>",
+                    "description":"<+pipeline.variables.description>"
+                  }
+              - name: RESOURCE_VARS_SECRETS
+                type: String
+                value: "{}"
+              - name: RESOURCE_VARS_ENVS
+                type: String
+                value: "{}"
+              - name: RESOURCE_VARS_ENVS_SECRET
+                type: String
+                value: "{}"
+              - name: GIT_REPOSITORY_BRANCH
+                type: String
+                value: main
+              - name: GIT_REPOSITORY_CONNECTOR
+                type: String
+                value: <+variable.account.custom_template_library_connector>
+              - name: GIT_REPOSITORY_NAME
+                type: String
+                value: <+variable.account.custom_template_library_repo>
+              - name: GIT_REPOSITORY_PATH
+                type: String
+                value: ccm-aws-member-connectors
+              - name: IAC_PROVISIONER_TYPE
+                type: String
+                value: opentofu
+              - name: IAC_PROVISIONER_VERSION
+                type: String
+                value: 1.10.0
+              - name: IAC_PROVIDER_CONNECTOR
+                type: String
+                value: ""
+              - name: INCLUDE_HARNESS_ENVS
+                type: String
+                value: "true"
+              - name: REGISTER_IDP
+                type: String
+                value: "${SHOULD_USE_HARNESS_IDP}"
+              # Determines if the workflow will trigger a temporary workspace that is
+              # deleted upon completion. Resources will be preserved
+              # Must be "true" or "false" and wrapped in quotes
+              - name: IS_EPHEMERAL
+                type: String
+                value: "false"
+              # Determines if the workflow will require an Approval before executing
+              # Must be "true" or "false" and wrapped in quotes
+              - name: REQUIRES_APPROVAL
+                type: String
+                value: "false"
+              - name: WORKSPACE_ORG
+                type: String
+                value: Harness_Platform_Management
+              - name: WORKSPACE_PROJECT
+                type: String
+                value: Solutions_Factory
+              - name: WORKSPACE_TAGS
+                type: String
+                # Used to group by type the workspaces for bulk actions
+                value: |-
+                  {
+                    "source":"custom",
+                    "type":"ccm-aws-member-connectors"
+                  }
+  variables:
+    - name: aws_account_ids
+      type: String
+      description: "[Required] AWS Account IDs to create member connectors for. Accepts a comma-separated list and/or one account ID per line"
+      required: true
+      value: <+input>
+    - name: cross_account_role_name
+      type: String
+      description: "[Required] Name of the standard cross-account IAM role deployed in every member account"
+      required: true
+      value: <+input>
+    - name: external_id
+      type: String
+      description: "[Required] External ID configured on the cross-account IAM role's trust policy"
+      required: true
+      value: <+input>
+    - name: features_enabled
+      type: String
+      description: "[Optional] JSON array of CCM features to enable on each connector. Valid values: OPTIMIZATION, VISIBILITY, GOVERNANCE"
+      required: false
+      value: <+input>.default(["OPTIMIZATION","VISIBILITY"])
+    - name: connector_name_prefix
+      type: String
+      description: "[Optional] Prefix used to build each connector's identifier/name"
+      required: false
+      value: <+input>.default(aws_ccm_member)
+    - name: description
+      type: String
+      description: "[Optional] Description applied to every created connector"
+      required: false
+      value: <+input>.default()
