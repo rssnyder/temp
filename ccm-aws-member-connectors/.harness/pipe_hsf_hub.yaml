@@ -83,7 +83,7 @@ pipeline:
               # Must be "true" or "false" and wrapped in quotes
               - name: REQUIRES_APPROVAL
                 type: String
-                value: "false"
+                value: "true"
               - name: WORKSPACE_ORG
                 type: String
                 value: Harness_Platform_Management
