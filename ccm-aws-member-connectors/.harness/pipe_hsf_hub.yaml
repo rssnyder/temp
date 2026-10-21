@@ -33,7 +33,9 @@ pipeline:
                     "aws_account_ids":"<+pipeline.variables.aws_account_ids>",
                     "cross_account_role_name":"<+pipeline.variables.cross_account_role_name>",
                     "external_id":"<+pipeline.variables.external_id>",
-                    "features_enabled":<+pipeline.variables.features_enabled>
+                    "features_enabled":<+pipeline.variables.features_enabled>,
+                    "connector_name_prefix":"<+pipeline.variables.connector_name_prefix>",
+                    "description":"<+pipeline.variables.description>"
                   }
               - name: RESOURCE_VARS_SECRETS
                 type: String
@@ -117,3 +119,13 @@ pipeline:
       description: "[Optional] JSON array of CCM features to enable on each connector. Valid values: OPTIMIZATION, VISIBILITY, GOVERNANCE"
       required: false
       value: <+input>.default(["OPTIMIZATION","VISIBILITY"])
+    - name: connector_name_prefix
+      type: String
+      description: "[Optional] Prefix used to build each connector's identifier/name"
+      required: false
+      value: <+input>.default(aws_ccm_member)
+    - name: description
+      type: String
+      description: "[Optional] Description applied to every created connector"
+      required: false
+      value: <+input>.default()

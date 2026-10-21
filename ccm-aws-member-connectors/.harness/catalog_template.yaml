@@ -62,6 +62,16 @@ spec:
               - Visibility
               - Governance
           uniqueItems: true
+        connector_name_prefix:
+          title: Connector Name Prefix
+          description: Prefix used to build each connector's identifier/name - connectors are named '<prefix>_<account_id>'
+          type: string
+          default: aws_ccm_member
+        description:
+          title: Connector Description
+          description: Description applied to every created connector
+          type: string
+          default: ""
         should_customize_workspace_name:
           title: Advanced Setup - Customize the Workspace Name
           type: boolean
@@ -199,6 +209,8 @@ spec:
             cross_account_role_name: ${{ parameters.cross_account_role_name }}
             external_id: ${{ parameters.external_id }}
             features_enabled: ${{ parameters.features_enabled }}
+            connector_name_prefix: ${{ parameters.connector_name_prefix }}
+            description: ${{ parameters.description }}
           # YAML of Terraform variables of type 'Secret' Reference mapped to their IDP parameters
           RESOURCE_VARS_SECRETS: {}
           # YAML of Environment variables of type 'String' mapped to their IDP parameters
