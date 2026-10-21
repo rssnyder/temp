@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.9.0] - 2026-10-21
+
+- ADD: Template ccm-aws-member-connectors with AWS CCM member account connector management and HSF Hub support
+
 ## [v2.8.0] - 2026-10-15
 
 - ADD: Template scs-ecr-primer with SCS ECR CI/CD step groups and HSF Hub support
