@@ -177,7 +177,7 @@ spec:
               type: string
               # Determines if the workflow will require an Approval before executing
               # Must be "true" or "false" and wrapped in quotes
-              default: "false"
+              default: "true"
               ui:widget: hidden
             use_mini_factory:
               type: string
