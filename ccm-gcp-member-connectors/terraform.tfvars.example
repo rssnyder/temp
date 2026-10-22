@@ -1,0 +1,27 @@
+# [Optional] Enter the Harness Platform URL.  Defaults to Harness SaaS URL
+harness_platform_url = "https://app.harness.io/gateway"
+
+# [Required] Enter the Harness Platform Account Number
+harness_platform_account = # Required
+
+# [Optional] Provide a Map of Tags to associate with the resources
+tags = {}
+
+# [Required] GCP Project IDs to create CCM member connectors for.
+# Accepts a comma-separated list and/or one project ID per line.
+gcp_project_ids = # Required e.g. "my-project-one,my-project-two" or <<-EOT
+                  # my-project-one
+                  # my-project-two
+                  # EOT
+
+# [Required] Email of the Harness service account granted access on every project
+service_account_email = # Required
+
+# [Optional] CCM features to enable on each member connector. Valid values: OPTIMIZATION, VISIBILITY, GOVERNANCE
+features_enabled = ["OPTIMIZATION", "VISIBILITY"]
+
+# [Optional] Prefix used to build each connector's identifier/name
+connector_name_prefix = "gcp_ccm_member"
+
+# [Optional] Description applied to every created connector
+description = ""

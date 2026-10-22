@@ -1,0 +1,234 @@
+apiVersion: harness.io/v1
+kind: Workflow
+identifier: ccmgcpmemberconnectors
+name: CCM GCP Member Connectors
+owner: group:default/_account_all_users
+type: harness_factory
+metadata:
+  description: Create GCP Cloud Cost Management member connectors for a list of GCP projects, using a shared Harness GCP service account
+  tags:
+    - solutions-factory
+    - harness
+    - ccm
+    - gcp
+    - connector
+spec:
+  presentation:
+    customTitle: CCM GCP Member Connectors
+    customSubTitle: Create GCP Cloud Cost Management connectors for a list of GCP member projects
+    customCreateButtonText: Create my connectors
+  parameters:
+    - title: GCP Member Connector Configuration
+      required:
+        - gcp_project_ids
+        - service_account_email
+        - token
+      properties:
+        # The token property needs to be in the first page of the workflow
+        token:
+          title: Harness Token
+          type: string
+          ui:widget: password
+          ui:field: HarnessAuthToken
+        gcp_project_ids:
+          title: GCP Project IDs
+          description: List the GCP project IDs to create connectors for. Enter them comma-separated and/or one per line.
+          type: string
+          ui:widget: textarea
+        service_account_email:
+          title: GCP Service Account Email
+          description: Email of the Harness GCP service account already granted access on every project listed above
+          type: string
+        features_enabled:
+          title: Features to Enable
+          description: Select which CCM features to enable on each member connector
+          type: array
+          default:
+            - OPTIMIZATION
+            - VISIBILITY
+          items:
+            type: string
+            enum:
+              - OPTIMIZATION
+              - VISIBILITY
+              - GOVERNANCE
+            enumNames:
+              - Optimization
+              - Visibility
+              - Governance
+          uniqueItems: true
+        connector_name_prefix:
+          title: Connector Name Prefix
+          description: Prefix used to build each connector's identifier/name - connectors are named '<prefix>_<gcp_project_id>'
+          type: string
+          default: gcp_ccm_member
+        description:
+          title: Connector Description
+          description: Description applied to every created connector
+          type: string
+          default: ""
+        should_customize_workspace_name:
+          title: Advanced Setup - Customize the Workspace Name
+          type: boolean
+          description: >-
+            By default, the backend workspace that manages these connectors is named "ccm-gcp-member-connectors".
+            Enable this if you need to run this workflow more than once to manage separate batches of GCP projects
+            (for example different business units, environments, or GCP Organizations) that each use their own
+            service account and/or feature set - every batch needs its own uniquely named workspace.
+          default: false
+      dependencies:
+        should_customize_workspace_name:
+          allOf:
+            - if:
+                properties:
+                  should_customize_workspace_name:
+                    const: true
+              then:
+                required:
+                  - workspace_name
+                properties:
+                  workspace_name:
+                    title: "Enter a unique Workspace Name for this batch of projects"
+                    type: string
+                    description: "Must be unique across all workspaces created by this workflow"
+                    pattern: '^([a-zA-Z][_a-zA-Z0-9-]*)$'
+                    maxLength: 128
+    - title: Solutions Factory Connection
+      properties:
+        solutions_factory_details:
+          title: Solutions Factory Details
+          type: object
+          description: |
+            ---
+            Harness URL : <+variable.account.solutions_factory_endpoint>
+
+            Harness Account : <+account.identifier>
+
+            Solutions Factory Org : <+variable.account.solutions_factory_org>
+
+            Solutions Factory Project : <+variable.account.solutions_factory_project>
+          required:
+            - harness_account_url
+            - harness_account_id
+            - harness_org_id
+            - harness_project_id
+            - template_library_connector
+            - template_library_repo
+            - template_library_branch
+            - template_library_directory
+          properties:
+            harness_account_url:
+              type: string
+              default: <+variable.account.solutions_factory_endpoint>
+              ui:widget: hidden
+            harness_account_id:
+              type: string
+              default: <+account.identifier>
+              ui:widget: hidden
+            harness_org_id:
+              type: string
+              default: <+variable.account.solutions_factory_org>
+              ui:widget: hidden
+            harness_project_id:
+              type: string
+              default: <+variable.account.solutions_factory_project>
+              ui:widget: hidden
+            template_library_connector:
+              type: string
+              default: <+variable.account.custom_template_library_connector>
+              ui:widget: hidden
+            template_library_repo:
+              type: string
+              default: <+variable.account.custom_template_library_repo>
+              ui:widget: hidden
+            template_library_branch:
+              type: string
+              default: main
+              ui:widget: hidden
+            template_library_directory:
+              type: string
+              default: ccm-gcp-member-connectors
+              ui:widget: hidden
+        solutions_factory_opts:
+          title: Solutions Factory Workflow Options
+          type: object
+          required:
+            - repo_source
+            - workspace_type
+          properties:
+            repo_source:
+              type: string
+              # Used to group by source the workspaces for bulk actions
+              default: custom
+              ui:widget: hidden
+            workspace_type:
+              type: string
+              # Used to group by type the workspaces for bulk actions
+              default: ccm-gcp-member-connectors
+              ui:widget: hidden
+            is_ephemeral:
+              type: string
+              # Determines if the workflow will trigger a temporary workspace that is
+              # deleted upon completion. Resources will be preserved
+              # Must be "true" or "false" and wrapped in quotes
+              default: "false"
+              ui:widget: hidden
+            requires_approval:
+              type: string
+              # Determines if the workflow will require an Approval before executing
+              # Must be "true" or "false" and wrapped in quotes
+              default: "true"
+              ui:widget: hidden
+            use_mini_factory:
+              type: string
+              # "When enabled, IDP workflows will default to leveraging the mini-factory to distribute workloads
+              # Value must be controlled through variable
+              default: <+variable.account.enable_hsf_mini_factory>
+              ui:widget: hidden
+  steps:
+    - id: configure_workspace
+      name: Configuring Harness Workspace
+      action: trigger:harness-custom-pipeline
+      input:
+        url: ${{ parameters.solutions_factory_details.harness_account_url }}/ng/account/${{ parameters.solutions_factory_details.harness_account_id }}/all/orgs/${{ parameters.solutions_factory_details.harness_org_id }}/projects/${{ "hws_" if parameters.solutions_factory_opts.use_mini_factory=="true" else "" }}${{ parameters.organization_id if parameters.solutions_factory_opts.use_mini_factory=="true" else parameters.solutions_factory_details.harness_project_id }}/pipelines/Create_and_Manage_IACM_Workspaces/pipeline-studio?storeType=INLINE
+        inputset:
+          GIT_REPOSITORY_CONNECTOR: ${{ parameters.solutions_factory_details.template_library_connector }}
+          GIT_REPOSITORY_NAME: ${{ parameters.solutions_factory_details.template_library_repo }}
+          GIT_REPOSITORY_BRANCH: ${{ parameters.solutions_factory_details.template_library_branch }}
+          GIT_REPOSITORY_PATH: ${{ parameters.solutions_factory_details.template_library_directory }}
+          RESOURCE_NAME: ${{ parameters.workspace_name if parameters.should_customize_workspace_name else "ccm-gcp-member-connectors" }}
+          RESOURCE_OWNER: group:default/harness_account_all_users
+          # YAML of Terraform variables of type 'String' mapped to their IDP parameters
+          RESOURCE_VARS:
+            gcp_project_ids: ${{ parameters.gcp_project_ids }}
+            service_account_email: ${{ parameters.service_account_email }}
+            features_enabled: ${{ parameters.features_enabled }}
+            connector_name_prefix: ${{ parameters.connector_name_prefix }}
+            description: ${{ parameters.description }}
+          # YAML of Terraform variables of type 'Secret' Reference mapped to their IDP parameters
+          RESOURCE_VARS_SECRETS: {}
+          # YAML of Environment variables of type 'String' mapped to their IDP parameters
+          RESOURCE_VARS_ENVS: {}
+          # YAML of Environment variables of type 'Secret' Reference mapped to their IDP parameters
+          RESOURCE_VARS_ENVS_SECRET: {}
+          # Should the workspace automatically include the default Harness Connector environment variables
+          INCLUDE_HARNESS_ENVS: "true"
+          WORKSPACE_TAGS:
+            source: ${{ parameters.solutions_factory_opts.repo_source }}
+            type: ${{ parameters.solutions_factory_opts.workspace_type }}
+          IS_EPHEMERAL: ${{ parameters.solutions_factory_opts.is_ephemeral }}
+          REQUIRES_APPROVAL: ${{ parameters.solutions_factory_opts.requires_approval }}
+        apikey: ${{ parameters.token }}
+        showOutputVariables: true
+  output:
+    links:
+      - title: Harness Workspace Configured - Execution Link
+        url: ${{ steps.configure_workspace.output.PipelineUrl }}
+      - title: Created Connectors
+        url: ${{ parameters.solutions_factory_details.harness_account_url }}/ng/account/${{ parameters.solutions_factory_details.harness_account_id }}/all/settings/connectors
+    text:
+      - title: Outputs
+        content: |
+          GCP CCM member connectors have been provisioned
+          ---
+          connectors: ${{ steps.configure_workspace.output['pipeline.stages.Provision.spec.execution.steps.Provision.steps.apply.output.outputVariables.connectors']}}
