@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.10.0] - 2026-10-23
+
+- ADD: Template ccm-azure-member-connectors with Azure CCM member account connector management and HSF Hub support
+- ADD: Template ccm-gcp-member-connectors with GCP CCM member account connector management and HSF Hub support
+
 ## [v2.9.0] - 2026-10-21
 
 - ADD: Template ccm-aws-member-connectors with AWS CCM member account connector management and HSF Hub support
