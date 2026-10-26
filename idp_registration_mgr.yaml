@@ -26,6 +26,7 @@ entities:
         modules: [ci, sto]
       - name: default-images-manual-update
         modules: [ci, idp, iacm]
+      - name: group-notification-update-pipeline
       - name: secret_manager_github_pat
         is_default: false
       - name: secret-manager-cyberark-conjur
