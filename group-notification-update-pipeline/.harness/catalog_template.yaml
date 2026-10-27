@@ -193,6 +193,22 @@ spec:
           default: Choose One
     - title: Solutions Factory Connection
       properties:
+        project_organization_id:
+          title: Project Organization (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'project_id'
+        workflow_project_organization_id:
+          title: Operational Workflow Project Organization (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'workflow_project_id'
         solutions_factory_details:
           title: Solutions Factory Details
           type: object
