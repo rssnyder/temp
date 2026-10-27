@@ -50,3 +50,13 @@ kubernetes_override_image_connector = "skipped"
 # namespace default. To not set this, leave as "skipped"
 kubernetes_service_account = "skipped"
 ################################################
+
+################################################
+# IDP Workflow Configuration
+#
+# Independent of organization_id/project_id above - e.g. leave these as "skipped" to publish
+# the workflow end users run at the account level, even if the pipeline lives in a project.
+################################################
+workflow_organization_id = "skipped"
+workflow_project_id       = "skipped"
+################################################

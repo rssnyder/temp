@@ -40,7 +40,9 @@ pipeline:
                     "kubernetes_namespace": "<+pipeline.variables.kubernetes_namespace>",
                     "kubernetes_node_selectors": <+pipeline.variables.kubernetes_node_selectors>,
                     "kubernetes_override_image_connector": "<+pipeline.variables.kubernetes_override_image_connector>",
-                    "kubernetes_service_account": "<+pipeline.variables.kubernetes_service_account>"
+                    "kubernetes_service_account": "<+pipeline.variables.kubernetes_service_account>",
+                    "workflow_organization_id": "<+pipeline.variables.workflow_organization_id>",
+                    "workflow_project_id": "<+pipeline.variables.workflow_project_id>"
                   }
               - name: RESOURCE_VARS_SECRETS
                 type: String
@@ -156,5 +158,16 @@ pipeline:
     - name: kubernetes_service_account
       type: String
       description: "[Optional] Enter a Kubernetes service account name to run the step group's pod as, overriding the namespace default. To not set this, ensure the value is 'skipped'"
+      required: false
+      value: <+input>.default(skipped)
+    ## Operational Workflow Catalog Placement (independent of organization_id/project_id above)
+    - name: workflow_organization_id
+      type: String
+      description: "[Optional] Organization to publish the operational IDP workflow into. Independent of organization_id above. To publish at the account level, ensure the value is 'skipped'"
+      required: false
+      value: <+input>.regex(^account.([a-zA-Z][_a-zA-Z0-9]*)$|org.([a-zA-Z][_a-zA-Z0-9]*)$|([a-zA-Z][_a-zA-Z0-9]*)$).default(skipped)
+    - name: workflow_project_id
+      type: String
+      description: "[Optional] Project to publish the operational IDP workflow into. Requires workflow_organization_id to also be set. To publish at the organization (or account) level, ensure the value is 'skipped'"
       required: false
       value: <+input>.default(skipped)

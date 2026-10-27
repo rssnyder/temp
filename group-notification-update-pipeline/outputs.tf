@@ -47,3 +47,13 @@ output "pipeline_executions_url" {
   description = "URL to the pipeline execution screen"
   value       = "${local.pipeline_base_url}/executions"
 }
+
+output "workflow_identifier" {
+  description = "The ID of the created IDP workflow catalog entity"
+  value       = harness_platform_idp_catalog_entity.update_group_notifications.identifier
+}
+
+output "workflow_scope" {
+  description = "The Harness scope (account, organization or project) the IDP workflow was published at"
+  value       = local.workflow_project_id != null ? "project" : local.workflow_organization_id != null ? "organization" : "account"
+}

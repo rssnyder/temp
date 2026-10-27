@@ -1,12 +1,3 @@
-data "harness_platform_organization" "selected" {
-  identifier = var.organization_id
-}
-
-data "harness_platform_project" "selected" {
-  identifier = var.project_id
-  org_id     = data.harness_platform_organization.selected.id
-}
-
 resource "harness_platform_pipeline" "update_group_notifications" {
   identifier  = var.pipeline_identifier
   name        = "Update Group Notifications"
@@ -37,6 +28,34 @@ resource "harness_platform_pipeline" "update_group_notifications" {
       KUBERNETES_NODESELECTORS : local.kubernetes_node_selectors_yaml
       KUBERNETES_IMAGE_CONNECTOR : var.kubernetes_override_image_connector
       KUBERNETES_SERVICE_ACCOUNT : var.kubernetes_service_account
+    }
+  )
+}
+
+####################
+# The IDP Workflow is the catalog form end users fill in to run the pipeline.
+# Its scope (account/org/project) is independent of the pipeline's own scope
+# above - see locals.workflow_organization_id/workflow_project_id.
+####################
+resource "harness_platform_idp_catalog_entity" "update_group_notifications" {
+  identifier = var.workflow_identifier
+  kind       = "workflow"
+  org_id     = local.workflow_organization_id
+  project_id = local.workflow_project_id
+
+  yaml = templatefile(
+    "${path.module}/templates/workflows/workflow_update_group_notifications.yaml.tpl",
+    {
+      WORKFLOW_IDENTIFIER : var.workflow_identifier
+      ORG_LINE : local.workflow_organization_id != null ? "orgIdentifier: ${local.workflow_organization_id}\n" : ""
+      PROJECT_LINE : local.workflow_project_id != null ? "projectIdentifier: ${local.workflow_project_id}\n" : ""
+      OWNER : var.workflow_owner
+
+      PIPELINE_URL : "${local.pipeline_base_url}/pipeline-studio?storeType=INLINE"
+      OUTPUT_PREFIX : local.workflow_output_prefix
+
+      # Scopes the user group picker's suggestions toward the pipeline's own org
+      PIPELINE_ORG_ID : data.harness_platform_organization.selected.id
     }
   )
 }

@@ -88,3 +88,40 @@ variable "kubernetes_service_account" {
   description = "[Optional] Kubernetes service account name to run the step group's pod as, overriding the namespace default. To not set this, ensure the value is 'skipped'"
   default     = "skipped"
 }
+
+################################################
+# IDP Workflow Configuration
+#
+# The IDP Workflow is the catalog form end users fill in to run the pipeline.
+# Its scope is independent of the pipeline's own organization_id/project_id
+# above, so it can be published somewhere else entirely (e.g. account level,
+# or a different org/project) than where the pipeline itself lives.
+################################################
+variable "workflow_identifier" {
+  type        = string
+  description = "[Optional] Identifier of the IDP workflow catalog entity"
+  default     = "update_group_notifications"
+}
+
+variable "workflow_owner" {
+  type        = string
+  description = "[Optional] IDP catalog owner of the workflow (e.g. a Backstage group entity reference such as group:default/HSF_Users)"
+  default     = "group:default/HSF_Users"
+}
+
+variable "workflow_organization_id" {
+  type        = string
+  description = "[Optional] Organization to publish the IDP workflow into. Leave as 'skipped' to publish it at the account level. Independent of organization_id above"
+  default     = "skipped"
+}
+
+variable "workflow_project_id" {
+  type        = string
+  description = "[Optional] Project to publish the IDP workflow into. Requires workflow_organization_id to also be set. Leave as 'skipped' to publish the workflow at the organization (or account) level"
+  default     = "skipped"
+
+  validation {
+    condition     = var.workflow_project_id == "skipped" || var.workflow_organization_id != "skipped"
+    error_message = "workflow_organization_id must be set when workflow_project_id is provided."
+  }
+}

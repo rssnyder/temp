@@ -10,6 +10,10 @@ This Template will create the following resources:
   `notification_type` and `notification_value` filled in at run time. The pipeline runs a Python
   script (via `harness-platform-sdk`) in a Custom stage step group that updates the requested
   notification channel on each listed group, leaving its other channels untouched.
+- An IDP catalog Workflow (a form end users fill in to run the pipeline above). Its scope
+  (`workflow_organization_id`/`workflow_project_id`) is independent of the pipeline's own
+  `organization_id`/`project_id` - the workflow can be published at the account level (or a
+  different org/project) than wherever the pipeline itself lives.
 
 ## Providers
 
@@ -86,6 +90,20 @@ options (service account and image overrides) used by other pipelines in this re
 | kubernetes_override_image_connector | | Container registry connector to override the default connector Harness uses for its internal images. To not set this, ensure the value is 'skipped' | string | skipped |
 | kubernetes_service_account | | Kubernetes service account name to run the step group's pod as, overriding the namespace default. To not set this, ensure the value is 'skipped' | string | skipped |
 
+### IDP Workflow Configuration
+
+The IDP catalog Workflow is the form end users fill in to run the pipeline (not the pipeline
+itself). Its scope is fully independent of `organization_id`/`project_id` above - e.g. it can be
+published at the account level for anyone to use, while the pipeline lives in one specific
+project.
+
+| Name | Mandatory | Description | Type | Default |
+| --- | --- | --- | --- | --- |
+| workflow_identifier | | Identifier of the IDP workflow catalog entity | string | update_group_notifications |
+| workflow_owner | | IDP catalog owner of the workflow (a Backstage group entity reference) | string | group:default/HSF_Users |
+| workflow_organization_id | | Organization to publish the IDP workflow into. To publish at the account level, ensure the value is 'skipped' | string | skipped |
+| workflow_project_id | | Project to publish the IDP workflow into. Requires workflow_organization_id to also be set. To publish at the organization (or account) level, ensure the value is 'skipped' | string | skipped |
+
 ## Terraform TFVARS
 
 Included in this repository is a `terraform.tfvars.example` file with a sample file that can be
@@ -101,6 +119,8 @@ used to construct your own `terraform.tfvars` file.
 | pipeline_identifier | The ID of the created pipeline | string |
 | pipeline_url | URL to the pipeline studio | string |
 | pipeline_executions_url | URL to the pipeline execution screen | string |
+| workflow_identifier | The ID of the created IDP workflow catalog entity | string |
+| workflow_scope | The Harness scope (account, organization or project) the IDP workflow was published at | string |
 
 ## Contributing
 

@@ -17,6 +17,11 @@ spec:
     customCreateButtonText: Create my pipeline
   parameters:
     - title: Harness Pipeline Target Location
+      description: |
+        ---
+        By default, this pipeline is deployed into the shared `Harness_Platform_Management` / `Solutions_Factory`
+        location used by other Solutions Factory platform tooling. Choose "Custom" to place the pipeline into a
+        different Organization and Project instead.
       properties:
         # The token property needs to be in the first page of the workflow
         token:
@@ -24,24 +29,46 @@ spec:
           type: string
           ui:widget: password
           ui:field: HarnessAuthToken
-        organization_id:
-          title: Harness Organization Name
+        deployment_scope:
+          title: Pipeline Deployment Scope
           type: string
-          description: Choose the Harness Organization into which the pipeline will be added
-          pattern: ^([a-zA-Z][_a-zA-Z0-9]*)$
+          default: default
+          enum:
+            - default
+            - custom
+          enumNames:
+            - Deploy into Harness_Platform_Management / Solutions_Factory (default)
+            - Choose a custom Organization and Project
+      dependencies:
+        deployment_scope:
+          allOf:
+            - if:
+                properties:
+                  deployment_scope:
+                    const: "custom"
+              then:
+                required:
+                  - project_id
+                properties:
+                  project_organization_id:
+                    $ref: "#/hierarchy/project_organization_id"
+                  project_id:
+                    $ref: "#/hierarchy/project_id"
+      hierarchy:
+        project_organization_id:
+          title: Organization (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
           ui:field: HarnessAutoOrgPicker
-          ui:autofocus: true
           dependencies:
             projectPickerRef:
               - 'project_id'
-          ui:widget: hidden
         project_id:
           title: Harness Project Name
           type: string
           description: Choose the Harness Project into which the pipeline will be added
           pattern: ^([a-zA-Z][_a-zA-Z0-9]*)$
           ui:field: HarnessProjectPicker
-          ui:autofocus: true
           default: Choose One
     - title: Pipeline Configuration
       required:
@@ -98,6 +125,72 @@ spec:
           default: {}
           additionalProperties:
             type: string
+    - title: Operational Workflow Catalog Placement
+      description: |
+        ---
+        This pipeline is operated through its own IDP catalog Workflow (a form for end users to submit
+        notification channel updates). That Workflow's scope is independent of where the pipeline itself is
+        deployed above - e.g. it can be published at the account level so anyone can use it, even if the
+        pipeline lives in a specific team's project.
+      properties:
+        workflow_deployment_scope:
+          title: Operational Workflow Scope
+          type: string
+          default: account
+          enum:
+            - account
+            - organization
+            - project
+          enumNames:
+            - Publish at Account Level (anyone can run it)
+            - Publish at Organization Level
+            - Publish at Project Level
+      dependencies:
+        workflow_deployment_scope:
+          allOf:
+            - if:
+                properties:
+                  workflow_deployment_scope:
+                    const: "organization"
+              then:
+                required:
+                  - workflow_organization_id
+                properties:
+                  workflow_organization_id:
+                    $ref: "#/hierarchy/workflow_organization_id"
+            - if:
+                properties:
+                  workflow_deployment_scope:
+                    const: "project"
+              then:
+                required:
+                  - workflow_project_id
+                properties:
+                  workflow_project_organization_id:
+                    $ref: "#/hierarchy/workflow_project_organization_id"
+                  workflow_project_id:
+                    $ref: "#/hierarchy/workflow_project_id"
+      hierarchy:
+        workflow_organization_id:
+          title: Organization for the Operational Workflow
+          type: string
+          description: Enter the Organization the operational workflow should be published into
+          ui:field: HarnessOrgPicker
+          default: Choose One
+        workflow_project_organization_id:
+          title: Organization for the Operational Workflow (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'workflow_project_id'
+        workflow_project_id:
+          title: Project for the Operational Workflow
+          type: string
+          description: Enter the Project the operational workflow should be published into
+          ui:field: HarnessProjectPicker
+          default: Choose One
     - title: Solutions Factory Connection
       properties:
         solutions_factory_details:
@@ -182,7 +275,7 @@ spec:
               type: string
               # Determines if the workflow will require an Approval before executing
               # Must be "true" or "false" and wrapped in quotes
-              default: "false"
+              default: "true"
               ui:widget: hidden
             use_mini_factory:
               type: string
@@ -195,18 +288,37 @@ spec:
       name: Configuring Harness Workspace
       action: trigger:harness-custom-pipeline
       input:
-        url: ${{ parameters.solutions_factory_details.harness_account_url }}/ng/account/${{ parameters.solutions_factory_details.harness_account_id }}/all/orgs/${{ parameters.solutions_factory_details.harness_org_id }}/projects/${{ "hws_" if parameters.solutions_factory_opts.use_mini_factory=="true" else "" }}${{ parameters.organization_id if parameters.solutions_factory_opts.use_mini_factory=="true" else parameters.solutions_factory_details.harness_project_id }}/pipelines/Create_and_Manage_IACM_Workspaces/pipeline-studio?storeType=INLINE
+        url: ${{ parameters.solutions_factory_details.harness_account_url }}/ng/account/${{ parameters.solutions_factory_details.harness_account_id }}/all/orgs/${{ parameters.solutions_factory_details.harness_org_id }}/projects/${{ "hws_" if parameters.solutions_factory_opts.use_mini_factory=="true" else "" }}${{ (parameters.project_organization_id if parameters.deployment_scope == "custom" else parameters.solutions_factory_details.harness_org_id) if parameters.solutions_factory_opts.use_mini_factory=="true" else parameters.solutions_factory_details.harness_project_id }}/pipelines/Create_and_Manage_IACM_Workspaces/pipeline-studio?storeType=INLINE
         inputset:
           GIT_REPOSITORY_CONNECTOR: ${{ parameters.solutions_factory_details.template_library_connector }}
           GIT_REPOSITORY_NAME: ${{ parameters.solutions_factory_details.template_library_repo }}
           GIT_REPOSITORY_BRANCH: ${{ parameters.solutions_factory_details.template_library_branch }}
           GIT_REPOSITORY_PATH: ${{ parameters.solutions_factory_details.template_library_directory }}
-          RESOURCE_NAME: ${{ parameters.organization_id|lower}}_${{ parameters.project_id|lower}}_update_group_notifications
+          # The RESOURCE_NAME must be unique for each workspace created.
+          RESOURCE_NAME: ${{
+            (parameters.project_organization_id + "_" + parameters.project_id)
+            if parameters.deployment_scope == "custom"
+            else "harness_platform_management_solutions_factory"
+            }}_update_group_notifications
           RESOURCE_OWNER: group:default/HSF_Users
           # YAML of Terraform variables of type 'String' mapped to their IDP parameters
           RESOURCE_VARS:
-            organization_id: ${{ parameters.organization_id }}
-            project_id: ${{ parameters.project_id }}
+            ################################################
+            # Pipeline Deployment Scope
+            # -----------
+            # Controls where the pipeline is deployed in the Harness hierarchy.  Defaults to the
+            # shared Harness_Platform_Management / Solutions_Factory location
+            ################################################
+            organization_id: ${{
+              parameters.project_organization_id
+              if parameters.deployment_scope == "custom"
+              else parameters.solutions_factory_details.harness_org_id
+              }}
+            project_id: ${{
+              parameters.project_id
+              if parameters.deployment_scope == "custom"
+              else "Solutions_Factory"
+              }}
             harness_api_key_secret_ref: ${{ parameters.harness_api_key_secret_ref }}
             docker_connector_ref: ${{ parameters.docker_connector_ref }}
             sdk_image: ${{ parameters.sdk_image }}
@@ -215,6 +327,24 @@ spec:
             kubernetes_service_account: ${{ parameters.kubernetes_service_account }}
             kubernetes_override_image_connector: ${{ parameters.kubernetes_override_image_connector }}
             kubernetes_node_selectors: ${{ parameters.kubernetes_node_selectors }}
+            ################################################
+            # Operational Workflow Catalog Placement
+            # -----------
+            # Independent of the pipeline deployment scope above
+            ################################################
+            workflow_organization_id: ${{
+              parameters.workflow_project_organization_id
+              if parameters.workflow_deployment_scope == "project"
+              else (
+                  parameters.workflow_organization_id
+                  if parameters.workflow_deployment_scope == "organization"
+                  else
+                      "skipped"
+              ) }}
+            workflow_project_id: ${{
+              parameters.workflow_project_id
+              if parameters.workflow_deployment_scope == "project"
+              else "skipped" }}
           # YAML of Terraform variables of type 'Secret' Reference mapped to their IDP parameters
           RESOURCE_VARS_SECRETS: {}
           # YAML of Environment variables of type 'String' mapped to their IDP parameters
