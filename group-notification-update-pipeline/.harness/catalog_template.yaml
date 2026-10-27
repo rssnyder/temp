@@ -133,6 +133,11 @@ spec:
         deployed above - e.g. it can be published at the account level so anyone can use it, even if the
         pipeline lives in a specific team's project.
       properties:
+        restrict_to_user_group_membership:
+          title: Only allow user to modify groups they are in
+          type: boolean
+          default: true
+          description: When checked, the operational workflow's user group picker only lets a user pick groups they are a member of. Uncheck to let a user modify any user group.
         workflow_deployment_scope:
           title: Operational Workflow Scope
           type: string
@@ -343,6 +348,7 @@ spec:
             kubernetes_service_account: ${{ parameters.kubernetes_service_account }}
             kubernetes_override_image_connector: ${{ parameters.kubernetes_override_image_connector }}
             kubernetes_node_selectors: ${{ parameters.kubernetes_node_selectors }}
+            restrict_to_user_group_membership: ${{ parameters.restrict_to_user_group_membership }}
             ################################################
             # Operational Workflow Catalog Placement
             # -----------

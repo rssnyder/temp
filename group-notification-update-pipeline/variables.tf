@@ -125,3 +125,9 @@ variable "workflow_project_id" {
     error_message = "workflow_organization_id must be set when workflow_project_id is provided."
   }
 }
+
+variable "restrict_to_user_group_membership" {
+  type        = bool
+  description = "[Optional] When true (default), the operational workflow's user group picker only lets a user pick groups they are a member of. Set to false to let a user modify any user group"
+  default     = true
+}

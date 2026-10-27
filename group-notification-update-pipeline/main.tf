@@ -56,6 +56,9 @@ resource "harness_platform_idp_catalog_entity" "update_group_notifications" {
 
       # Scopes the user group picker's suggestions toward the pipeline's own org
       PIPELINE_ORG_ID : data.harness_platform_organization.selected.id
+
+      RESTRICT_TO_USER_MEMBERSHIP : var.restrict_to_user_group_membership
+      USER_GROUPS_DESCRIPTION : var.restrict_to_user_group_membership ? "Groups you are a member of, at any scope. Add one entry per group." : "Any user group, at any scope. Add one entry per group."
     }
   )
 }

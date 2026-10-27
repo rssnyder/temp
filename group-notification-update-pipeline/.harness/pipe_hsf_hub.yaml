@@ -42,7 +42,8 @@ pipeline:
                     "kubernetes_override_image_connector": "<+pipeline.variables.kubernetes_override_image_connector>",
                     "kubernetes_service_account": "<+pipeline.variables.kubernetes_service_account>",
                     "workflow_organization_id": "<+pipeline.variables.workflow_organization_id>",
-                    "workflow_project_id": "<+pipeline.variables.workflow_project_id>"
+                    "workflow_project_id": "<+pipeline.variables.workflow_project_id>",
+                    "restrict_to_user_group_membership": <+pipeline.variables.restrict_to_user_group_membership>
                   }
               - name: RESOURCE_VARS_SECRETS
                 type: String
@@ -171,3 +172,8 @@ pipeline:
       description: "[Optional] Project to publish the operational IDP workflow into. Requires workflow_organization_id to also be set. To publish at the organization (or account) level, ensure the value is 'skipped'"
       required: false
       value: <+input>.default(skipped)
+    - name: restrict_to_user_group_membership
+      type: String
+      description: "[Optional] When true (default), the operational workflow's user group picker only lets a user pick groups they are a member of. Set to false to let a user modify any user group"
+      required: false
+      value: <+input>.default(true).selectOneFrom(true,false)

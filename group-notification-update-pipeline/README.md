@@ -103,6 +103,7 @@ project.
 | workflow_owner | | IDP catalog owner of the workflow (a Backstage group entity reference) | string | group:default/HSF_Users |
 | workflow_organization_id | | Organization to publish the IDP workflow into. To publish at the account level, ensure the value is 'skipped' | string | skipped |
 | workflow_project_id | | Project to publish the IDP workflow into. Requires workflow_organization_id to also be set. To publish at the organization (or account) level, ensure the value is 'skipped' | string | skipped |
+| restrict_to_user_group_membership | | When true, the operational workflow's user group picker only lets a user pick groups they are a member of. Set to false to let a user modify any user group | bool | true |
 
 ## Terraform TFVARS
 

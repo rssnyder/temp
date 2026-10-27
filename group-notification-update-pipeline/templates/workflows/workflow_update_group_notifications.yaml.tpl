@@ -31,7 +31,7 @@ spec:
           ui:field: HarnessAuthToken
         user_groups:
           title: User Groups
-          description: Groups you are a member of, at any scope. Add one entry per group.
+          description: ${USER_GROUPS_DESCRIPTION}
           type: array
           minItems: 1
           uniqueItems: true
@@ -39,7 +39,7 @@ spec:
             type: string
             ui:field: HarnessUserGroupPicker
             ui:options:
-              filterByUserMembership: true
+              filterByUserMembership: ${RESTRICT_TO_USER_MEMBERSHIP}
               additionalScopes:
                 - orgIdentifier: ${PIPELINE_ORG_ID}
                   includeChildScopes: false
