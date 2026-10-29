@@ -1,0 +1,395 @@
+apiVersion: harness.io/v1
+kind: Workflow
+identifier: updategroupnotifications
+name: Update Group Notifications
+owner: group:default/HSF_Admins
+type: harness_factory
+metadata:
+  description: Deploys a pipeline that sets a notification channel (Email, Slack, PagerDuty or Microsoft Teams) on one or more Harness user groups
+  tags:
+    - solutions-factory
+    - harness
+    - platform
+spec:
+  presentation:
+    customTitle: Update Group Notifications
+    customSubTitle: Creates a pipeline for updating Harness user group notification channels
+    customCreateButtonText: Create my pipeline
+  parameters:
+    - title: Harness Pipeline Target Location
+      description: |
+        ---
+        By default, this pipeline is deployed into the shared `Harness_Platform_Management` / `Solutions_Factory`
+        location used by other Solutions Factory platform tooling. Choose "Custom" to place the pipeline into a
+        different Organization and Project instead.
+      properties:
+        # The token property needs to be in the first page of the workflow
+        token:
+          title: Harness Token
+          type: string
+          ui:widget: password
+          ui:field: HarnessAuthToken
+        deployment_scope:
+          title: Pipeline Deployment Scope
+          type: string
+          default: default
+          enum:
+            - default
+            - custom
+          enumNames:
+            - Deploy into Harness_Platform_Management / Solutions_Factory (default)
+            - Choose a custom Organization and Project
+      dependencies:
+        deployment_scope:
+          allOf:
+            - if:
+                properties:
+                  deployment_scope:
+                    const: "custom"
+              then:
+                required:
+                  - project_id
+                properties:
+                  project_organization_id:
+                    $ref: "#/hierarchy/project_organization_id"
+                  project_id:
+                    $ref: "#/hierarchy/project_id"
+      hierarchy:
+        project_organization_id:
+          title: Organization (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'project_id'
+        project_id:
+          title: Harness Project Name
+          type: string
+          description: Choose the Harness Project into which the pipeline will be added
+          pattern: ^([a-zA-Z][_a-zA-Z0-9]*)$
+          ui:field: HarnessProjectPicker
+          default: Choose One
+    - title: Pipeline Configuration
+      required:
+        - harness_api_key_secret_ref
+      properties:
+        harness_api_key_secret_ref:
+          title: Harness API Key Secret Reference
+          description: |
+            ---
+            Reference to an existing Harness Secret holding an API key (PAT/SAT) with View and Manage permission on user groups at every scope you intend to update.
+
+            Must be scope-qualified (e.g. `account.harness_api_key`, `org.harness_api_key`) or a bare identifier for a project secret
+          type: string
+        docker_connector_ref:
+          title: Docker Connector Reference
+          description: Docker registry connector used to pull the SDK image for the Run step (an anonymous Docker Hub connector works; the image is public)
+          type: string
+          default: account.harnessImage
+        sdk_image:
+          title: SDK Image Override
+          description: Image with harness-platform-sdk preinstalled, used by the Run step. Pin a version tag rather than latest
+          type: string
+          default: harnesssolutionfactory/harness-platform-sdk:v1.1.0
+    - title: Advanced Kubernetes Configuration
+      description: |
+        ---
+        The pipeline runs the update script in a Custom stage step group, which always executes on a Kubernetes cluster (there is no Cloud build infrastructure option for step groups outside of CI stages)
+      required:
+        - kubernetes_connector
+      properties:
+        kubernetes_connector:
+          title: Kubernetes Connector Reference
+          description: Kubernetes connector for the step group's infrastructure (e.g. "account.my_cluster"). Must exist before execution
+          type: string
+        kubernetes_namespace:
+          title: Kubernetes Namespace
+          description: Kubernetes namespace the step group's pod runs in
+          type: string
+          default: default
+        kubernetes_service_account:
+          title: Kubernetes Service Account Override
+          description: Kubernetes service account name to run the step group's pod as, overriding the namespace default. To not set this, leave as "skipped"
+          type: string
+          default: skipped
+        kubernetes_override_image_connector:
+          title: Kubernetes Harness Image Connector Override
+          description: Container registry connector to override the default connector Harness uses for its internal images. Must exist before execution. To not set this, leave as "skipped"
+          type: string
+          default: skipped
+        kubernetes_node_selectors:
+          title: Kubernetes Node Selectors
+          description: Optional node selectors (key/value pairs) for scheduling the step group's pod
+          type: object
+          default: {}
+          additionalProperties:
+            type: string
+    - title: Operational Workflow Catalog Placement
+      description: |
+        ---
+        This pipeline is operated through its own IDP catalog Workflow (a form for end users to submit
+        notification channel updates). That Workflow's scope is independent of where the pipeline itself is
+        deployed above - e.g. it can be published at the account level so anyone can use it, even if the
+        pipeline lives in a specific team's project.
+      properties:
+        restrict_to_user_group_membership:
+          title: Only allow user to modify groups they are in
+          type: boolean
+          default: true
+          description: When checked, the operational workflow's user group picker only lets a user pick groups they are a member of. Uncheck to let a user modify any user group.
+        workflow_deployment_scope:
+          title: Operational Workflow Scope
+          type: string
+          default: account
+          enum:
+            - account
+            - organization
+            - project
+          enumNames:
+            - Publish at Account Level (anyone can run it)
+            - Publish at Organization Level
+            - Publish at Project Level
+      dependencies:
+        workflow_deployment_scope:
+          allOf:
+            - if:
+                properties:
+                  workflow_deployment_scope:
+                    const: "organization"
+              then:
+                required:
+                  - workflow_organization_id
+                properties:
+                  workflow_organization_id:
+                    $ref: "#/hierarchy/workflow_organization_id"
+            - if:
+                properties:
+                  workflow_deployment_scope:
+                    const: "project"
+              then:
+                required:
+                  - workflow_project_id
+                properties:
+                  workflow_project_organization_id:
+                    $ref: "#/hierarchy/workflow_project_organization_id"
+                  workflow_project_id:
+                    $ref: "#/hierarchy/workflow_project_id"
+      hierarchy:
+        workflow_organization_id:
+          title: Organization for the Operational Workflow
+          type: string
+          description: Enter the Organization the operational workflow should be published into
+          ui:field: HarnessOrgPicker
+          default: Choose One
+        workflow_project_organization_id:
+          title: Organization for the Operational Workflow (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'workflow_project_id'
+        workflow_project_id:
+          title: Project for the Operational Workflow
+          type: string
+          description: Enter the Project the operational workflow should be published into
+          ui:field: HarnessProjectPicker
+          default: Choose One
+    - title: Solutions Factory Connection
+      properties:
+        project_organization_id:
+          title: Project Organization (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'project_id'
+        workflow_project_organization_id:
+          title: Operational Workflow Project Organization (auto-derived)
+          type: string
+          description: Automatically derived from the selected Project. Do not set manually.
+          ui:field: HarnessAutoOrgPicker
+          dependencies:
+            projectPickerRef:
+              - 'workflow_project_id'
+        solutions_factory_details:
+          title: Solutions Factory Details
+          type: object
+          description: |
+            ---
+            Harness URL : <+variable.account.solutions_factory_endpoint>
+
+            Harness Account : <+account.identifier>
+
+            Solutions Factory Org : <+variable.account.solutions_factory_org>
+
+            Solutions Factory Project : <+variable.account.solutions_factory_project>
+          required:
+            - harness_account_url
+            - harness_account_id
+            - harness_org_id
+            - harness_project_id
+            - template_library_connector
+            - template_library_repo
+            - template_library_branch
+            - template_library_directory
+          properties:
+            harness_account_url:
+              type: string
+              default: <+variable.account.solutions_factory_endpoint>
+              ui:widget: hidden
+            harness_account_id:
+              type: string
+              default: <+account.identifier>
+              ui:widget: hidden
+            harness_org_id:
+              type: string
+              default: <+variable.account.solutions_factory_org>
+              ui:widget: hidden
+            harness_project_id:
+              type: string
+              default: <+variable.account.solutions_factory_project>
+              ui:widget: hidden
+            template_library_connector:
+              type: string
+              default: <+variable.account.custom_template_library_connector>
+              ui:widget: hidden
+            template_library_repo:
+              type: string
+              default: <+variable.account.custom_template_library_repo>
+              ui:widget: hidden
+            template_library_branch:
+              type: string
+              default: main
+              ui:widget: hidden
+            template_library_directory:
+              type: string
+              default: group-notification-update-pipeline
+              ui:widget: hidden
+        solutions_factory_opts:
+          title: Solutions Factory Workflow Options
+          type: object
+          required:
+            - repo_source
+            - workspace_type
+          properties:
+            repo_source:
+              type: string
+              # Used to group by source the workspaces for bulk actions
+              default: custom
+              ui:widget: hidden
+            workspace_type:
+              type: string
+              # Used to group by type the workspaces for bulk actions
+              default: group-notification-update-pipeline
+              ui:widget: hidden
+            is_ephemeral:
+              type: string
+              # Determines if the workflow will trigger a temporary workspace that is
+              # deleted upon completion. Resources will be preserved
+              # Must be "true" or "false" and wrapped in quotes
+              default: "false"
+              ui:widget: hidden
+            requires_approval:
+              type: string
+              # Determines if the workflow will require an Approval before executing
+              # Must be "true" or "false" and wrapped in quotes
+              default: "true"
+              ui:widget: hidden
+            use_mini_factory:
+              type: string
+              # "When enabled, IDP workflows will default to leveraging the mini-factory to distribute workloads
+              # Value must be controlled through variable
+              default: <+variable.account.enable_hsf_mini_factory>
+              ui:widget: hidden
+  steps:
+    - id: configure_workspace
+      name: Configuring Harness Workspace
+      action: trigger:harness-custom-pipeline
+      input:
+        url: ${{ parameters.solutions_factory_details.harness_account_url }}/ng/account/${{ parameters.solutions_factory_details.harness_account_id }}/all/orgs/${{ parameters.solutions_factory_details.harness_org_id }}/projects/${{ "hws_" if parameters.solutions_factory_opts.use_mini_factory=="true" else "" }}${{ (parameters.project_organization_id if parameters.deployment_scope == "custom" else parameters.solutions_factory_details.harness_org_id) if parameters.solutions_factory_opts.use_mini_factory=="true" else parameters.solutions_factory_details.harness_project_id }}/pipelines/Create_and_Manage_IACM_Workspaces/pipeline-studio?storeType=INLINE
+        inputset:
+          GIT_REPOSITORY_CONNECTOR: ${{ parameters.solutions_factory_details.template_library_connector }}
+          GIT_REPOSITORY_NAME: ${{ parameters.solutions_factory_details.template_library_repo }}
+          GIT_REPOSITORY_BRANCH: ${{ parameters.solutions_factory_details.template_library_branch }}
+          GIT_REPOSITORY_PATH: ${{ parameters.solutions_factory_details.template_library_directory }}
+          # The RESOURCE_NAME must be unique for each workspace created.
+          RESOURCE_NAME: ${{
+            (parameters.project_organization_id + "_" + parameters.project_id)
+            if parameters.deployment_scope == "custom"
+            else "harness_platform_management_solutions_factory"
+            }}_update_group_notifications
+          RESOURCE_OWNER: group:default/HSF_Users
+          # YAML of Terraform variables of type 'String' mapped to their IDP parameters
+          RESOURCE_VARS:
+            ################################################
+            # Pipeline Deployment Scope
+            # -----------
+            # Controls where the pipeline is deployed in the Harness hierarchy.  Defaults to the
+            # shared Harness_Platform_Management / Solutions_Factory location
+            ################################################
+            organization_id: ${{
+              parameters.project_organization_id
+              if parameters.deployment_scope == "custom"
+              else parameters.solutions_factory_details.harness_org_id
+              }}
+            project_id: ${{
+              parameters.project_id
+              if parameters.deployment_scope == "custom"
+              else "Solutions_Factory"
+              }}
+            harness_api_key_secret_ref: ${{ parameters.harness_api_key_secret_ref }}
+            docker_connector_ref: ${{ parameters.docker_connector_ref }}
+            sdk_image: ${{ parameters.sdk_image }}
+            kubernetes_connector: ${{ parameters.kubernetes_connector }}
+            kubernetes_namespace: ${{ parameters.kubernetes_namespace }}
+            kubernetes_service_account: ${{ parameters.kubernetes_service_account }}
+            kubernetes_override_image_connector: ${{ parameters.kubernetes_override_image_connector }}
+            kubernetes_node_selectors: ${{ parameters.kubernetes_node_selectors }}
+            restrict_to_user_group_membership: ${{ parameters.restrict_to_user_group_membership }}
+            ################################################
+            # Operational Workflow Catalog Placement
+            # -----------
+            # Independent of the pipeline deployment scope above
+            ################################################
+            workflow_organization_id: ${{
+              parameters.workflow_project_organization_id
+              if parameters.workflow_deployment_scope == "project"
+              else (
+                  parameters.workflow_organization_id
+                  if parameters.workflow_deployment_scope == "organization"
+                  else
+                      "skipped"
+              ) }}
+            workflow_project_id: ${{
+              parameters.workflow_project_id
+              if parameters.workflow_deployment_scope == "project"
+              else "skipped" }}
+          # YAML of Terraform variables of type 'Secret' Reference mapped to their IDP parameters
+          RESOURCE_VARS_SECRETS: {}
+          # YAML of Environment variables of type 'String' mapped to their IDP parameters
+          RESOURCE_VARS_ENVS: {}
+          # YAML of Environment variables of type 'Secret' Reference mapped to their IDP parameters
+          RESOURCE_VARS_ENVS_SECRET: {}
+          # Should the workspace automatically include the default Harness Connector environment variables
+          INCLUDE_HARNESS_ENVS: "true"
+          WORKSPACE_TAGS:
+            source: ${{ parameters.solutions_factory_opts.repo_source }}
+            type: ${{ parameters.solutions_factory_opts.workspace_type }}
+          IS_EPHEMERAL: ${{ parameters.solutions_factory_opts.is_ephemeral }}
+          REQUIRES_APPROVAL: ${{ parameters.solutions_factory_opts.requires_approval }}
+        apikey: ${{ parameters.token }}
+        showOutputVariables: true
+  output:
+    links:
+      - title: Deployed Pipeline
+        url: ${{ steps.configure_workspace.output['pipeline.stages.Provision.spec.execution.steps.Provision.steps.apply.output.outputVariables.pipeline_executions_url']}}
+    text:
+      - title: Outputs
+        content: |
+          ---
+          ## Your Update Group Notifications pipeline is operational
+          ---
+          Click the `Deployed Pipeline` link above to navigate directly to the deployed resource. Upon navigating to the pipeline, click **RUN** and fill in the user groups, notification type and notification value to update.

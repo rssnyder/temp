@@ -1,0 +1,66 @@
+# [Optional] Enter the Harness Platform URL.  Defaults to Harness SaaS URL
+harness_platform_url = "https://app.harness.io/gateway"
+
+# [Required] Enter the Harness Platform Account Number
+harness_platform_account = # Required
+
+# [Optional] Provide a Map of Tags to associate with the resources
+tags = {}
+
+## Harness Hierarchy Setup Details
+# [Required] Provide an existing organization reference ID.  Must exist before execution
+organization_id = # Required
+
+# [Required] Provide an existing project reference ID.  Must exist before execution
+project_id = # Required
+
+################################################
+# Pipeline Configuration
+################################################
+# [Optional] Identifier of the created pipeline
+pipeline_identifier = "update_group_notifications"
+
+# [Required] Reference to an existing Harness Secret holding an API key (PAT/SAT) with View and
+# Manage permission on user groups at every scope you intend to update
+harness_api_key_secret_ref = # Required
+
+# [Optional] Docker registry connector used by the Run step to pull the SDK image
+docker_connector_ref = "account.harnessImage"
+
+# [Optional] Image with harness-platform-sdk preinstalled, used by the Run step
+sdk_image = "harnesssolutionfactory/harness-platform-sdk:v1.1.0"
+
+################################################
+# Advanced Kubernetes Step Group Configuration
+################################################
+# [Required] Kubernetes connector for the step group's infrastructure (e.g. "account.my_cluster")
+kubernetes_connector = # Required
+
+# [Optional] Kubernetes namespace the step group's pod runs in
+kubernetes_namespace = "default"
+
+# [Optional] Kubernetes node selectors for scheduling the step group's pod
+kubernetes_node_selectors = {}
+
+# [Optional] Container registry connector to override the default connector Harness uses for its
+# internal images. To not set this, leave as "skipped"
+kubernetes_override_image_connector = "skipped"
+
+# [Optional] Kubernetes service account name to run the step group's pod as, overriding the
+# namespace default. To not set this, leave as "skipped"
+kubernetes_service_account = "skipped"
+################################################
+
+################################################
+# IDP Workflow Configuration
+#
+# Independent of organization_id/project_id above - e.g. leave these as "skipped" to publish
+# the workflow end users run at the account level, even if the pipeline lives in a project.
+################################################
+workflow_organization_id = "skipped"
+workflow_project_id       = "skipped"
+
+# [Optional] When true (default), the operational workflow's user group picker only lets a user
+# pick groups they are a member of. Set to false to let a user modify any user group
+restrict_to_user_group_membership = true
+################################################
