@@ -302,7 +302,7 @@ spec:
               type: string
               # "When enabled, IDP workflows will default to leveraging the mini-factory to distribute workloads
               # Value must be controlled through variable
-              default: <+variable.account.enable_hsf_mini_factory>
+              default: "false"
               ui:widget: hidden
   steps:
     - id: configure_workspace

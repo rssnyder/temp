@@ -60,6 +60,12 @@ kubernetes_service_account = "skipped"
 workflow_organization_id = "skipped"
 workflow_project_id       = "skipped"
 
+# [Optional] Identifier of the IDP workflow catalog entity
+workflow_identifier = "update_group_notifications"
+
+# [Optional] IDP catalog owner of the workflow (a Backstage group entity reference)
+workflow_owner = "group:default/HSF_Users"
+
 # [Optional] When true (default), the operational workflow's user group picker only lets a user
 # pick groups they are a member of. Set to false to let a user modify any user group
 restrict_to_user_group_membership = true
