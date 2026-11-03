@@ -15,7 +15,7 @@ pipeline:
       type: String
       description: Notification channel type to set
       required: true
-      value: <+input>.allowedValues(EMAIL,SLACK,PAGERDUTY,MSTEAMS)
+      value: <+input>.allowedValues(${ALLOWED_NOTIFICATION_TYPES})
     - name: notification_value
       type: String
       description: Group email address, Slack/Teams webhook URL, or PagerDuty key, matching the type

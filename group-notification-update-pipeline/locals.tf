@@ -33,4 +33,16 @@ locals {
   # Where the Run step's output variables live in the pipeline execution. Must
   # match the stage, step group and step identifiers in the pipeline YAML template.
   workflow_output_prefix = "pipeline.stages.update_user_groups.spec.execution.steps.update_user_groups_group.steps.set_notification_channel.output.outputVariables"
+
+  ####################
+  # Display label for each supported notification channel type, used to render the
+  # end-user-facing enum in the operational workflow.
+  ####################
+  notification_type_labels = {
+    EMAIL     = "Email"
+    SLACK     = "Slack"
+    PAGERDUTY = "PagerDuty"
+    MSTEAMS   = "Microsoft Teams"
+  }
+  notification_type_labels_ordered = [for t in var.allowed_notification_types : local.notification_type_labels[t]]
 }

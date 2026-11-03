@@ -30,6 +30,9 @@ docker_connector_ref = "account.harnessImage"
 # [Optional] Image with harness-platform-sdk preinstalled, used by the Run step
 sdk_image = "harnesssolutionfactory/harness-platform-sdk:v1.1.0"
 
+# [Optional] Notification channel types offered to end users in the pipeline and operational workflow
+allowed_notification_types = ["EMAIL", "SLACK", "PAGERDUTY", "MSTEAMS"]
+
 ################################################
 # Advanced Kubernetes Step Group Configuration
 ################################################

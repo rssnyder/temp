@@ -28,6 +28,8 @@ resource "harness_platform_pipeline" "update_group_notifications" {
       KUBERNETES_NODESELECTORS : local.kubernetes_node_selectors_yaml
       KUBERNETES_IMAGE_CONNECTOR : var.kubernetes_override_image_connector
       KUBERNETES_SERVICE_ACCOUNT : var.kubernetes_service_account
+
+      ALLOWED_NOTIFICATION_TYPES : join(",", var.allowed_notification_types)
     }
   )
 }
@@ -59,6 +61,9 @@ resource "harness_platform_idp_catalog_entity" "update_group_notifications" {
 
       RESTRICT_TO_USER_MEMBERSHIP : var.restrict_to_user_group_membership
       USER_GROUPS_DESCRIPTION : var.restrict_to_user_group_membership ? "Groups you are a member of, at any scope. Add one entry per group." : "Any user group, at any scope. Add one entry per group."
+
+      NOTIFICATION_TYPES : var.allowed_notification_types
+      NOTIFICATION_TYPE_LABELS : local.notification_type_labels_ordered
     }
   )
 }

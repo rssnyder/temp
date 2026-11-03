@@ -36,6 +36,7 @@ pipeline:
                     "harness_api_key_secret_ref": "<+pipeline.variables.harness_api_key_secret_ref>",
                     "docker_connector_ref": "<+pipeline.variables.docker_connector_ref>",
                     "sdk_image": "<+pipeline.variables.sdk_image>",
+                    "allowed_notification_types": ["<+pipeline.variables.allowed_notification_types.replace(',','\",\"')>"],
                     "kubernetes_connector": "<+pipeline.variables.kubernetes_connector>",
                     "kubernetes_namespace": "<+pipeline.variables.kubernetes_namespace>",
                     "kubernetes_node_selectors": <+pipeline.variables.kubernetes_node_selectors>,
@@ -135,6 +136,11 @@ pipeline:
       description: "[Optional] Image with harness-platform-sdk preinstalled, used by the Run step. Pin a version tag rather than latest"
       required: false
       value: <+input>.default(harnesssolutionfactory/harness-platform-sdk:v1.1.0)
+    - name: allowed_notification_types
+      type: String
+      description: "[Optional] Notification channel types to offer end users in the pipeline and operational workflow"
+      required: false
+      value: <+input>.default(EMAIL).selectManyFrom(EMAIL,SLACK,PAGERDUTY,MSTEAMS)
     ## Advanced Kubernetes Step Group Configuration
     - name: kubernetes_connector
       type: String

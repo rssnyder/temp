@@ -92,6 +92,29 @@ spec:
           description: Image with harness-platform-sdk preinstalled, used by the Run step. Pin a version tag rather than latest
           type: string
           default: harnesssolutionfactory/harness-platform-sdk:v1.1.0
+        allowed_notification_types:
+          title: Notification Channels to Offer End Users
+          description: Choose which notification channel types end users can set in the pipeline and operational workflow
+          type: array
+          minItems: 1
+          uniqueItems: true
+          default:
+            - EMAIL
+            - SLACK
+            - PAGERDUTY
+            - MSTEAMS
+          items:
+            type: string
+            enum:
+              - EMAIL
+              - SLACK
+              - PAGERDUTY
+              - MSTEAMS
+            enumNames:
+              - Email
+              - Slack
+              - PagerDuty
+              - Microsoft Teams
     - title: Advanced Kubernetes Configuration
       description: |
         ---
@@ -343,6 +366,7 @@ spec:
             harness_api_key_secret_ref: ${{ parameters.harness_api_key_secret_ref }}
             docker_connector_ref: ${{ parameters.docker_connector_ref }}
             sdk_image: ${{ parameters.sdk_image }}
+            allowed_notification_types: ${{ parameters.allowed_notification_types }}
             kubernetes_connector: ${{ parameters.kubernetes_connector }}
             kubernetes_namespace: ${{ parameters.kubernetes_namespace }}
             kubernetes_service_account: ${{ parameters.kubernetes_service_account }}

@@ -75,6 +75,7 @@ connector._
 | harness_api_key_secret_ref | X | Reference to an existing Harness Secret holding an API key with View and Manage permission on user groups | string ||
 | docker_connector_ref | | Docker registry connector used by the Run step to pull the SDK image | string | account.harnessImage |
 | sdk_image | | Image with harness-platform-sdk preinstalled, used by the Run step | string | harnesssolutionfactory/harness-platform-sdk:v1.1.0 |
+| allowed_notification_types | | Notification channel types offered to end users in the pipeline and operational workflow | list(string) | ["EMAIL", "SLACK", "PAGERDUTY", "MSTEAMS"] |
 
 ### Advanced Kubernetes Step Group Configuration
 

@@ -53,15 +53,13 @@ spec:
           description: Only this channel type is changed; other channels on the group are kept.
           type: string
           enum:
-            - EMAIL
-            - SLACK
-            - PAGERDUTY
-            - MSTEAMS
+          %{~ for t in NOTIFICATION_TYPES }
+            - ${t}
+          %{~ endfor ~}
           enumNames:
-            - Email
-            - Slack
-            - PagerDuty
-            - Microsoft Teams
+          %{~ for label in NOTIFICATION_TYPE_LABELS }
+            - ${label}
+          %{~ endfor ~}
         notification_value:
           title: Notification Target
           description: Email address for Email, webhook URL for Slack or Microsoft Teams, integration key for PagerDuty.

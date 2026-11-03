@@ -53,6 +53,17 @@ variable "sdk_image" {
   default     = "harnesssolutionfactory/harness-platform-sdk:v1.1.0"
 }
 
+variable "allowed_notification_types" {
+  type        = list(string)
+  description = "[Optional] Notification channel types offered to end users in the pipeline and operational workflow. Must be a non-empty subset of EMAIL, SLACK, PAGERDUTY, MSTEAMS"
+  default     = ["EMAIL", "SLACK", "PAGERDUTY", "MSTEAMS"]
+
+  validation {
+    condition     = length(var.allowed_notification_types) > 0 && alltrue([for t in var.allowed_notification_types : contains(["EMAIL", "SLACK", "PAGERDUTY", "MSTEAMS"], t)])
+    error_message = "allowed_notification_types must be a non-empty list containing only: EMAIL, SLACK, PAGERDUTY, MSTEAMS."
+  }
+}
+
 ################################################
 # Advanced Kubernetes Step Group Configuration
 #
