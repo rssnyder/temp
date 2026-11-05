@@ -36,7 +36,7 @@ resource "harness_platform_role_assignments" "pipeline_access_all_users" {
   org_id                    = data.harness_platform_organization.selected.id
   project_id                = data.harness_platform_project.selected.id
   resource_group_identifier = harness_platform_resource_group.pipeline_access.id
-  role_identifier           = "_idp_workflow_executor"
+  role_identifier           = "_pipeline_executor"
 
   principal {
     identifier  = "_account_all_users"
