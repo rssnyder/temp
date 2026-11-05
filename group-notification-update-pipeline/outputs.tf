@@ -57,3 +57,8 @@ output "workflow_scope" {
   description = "The Harness scope (account, organization or project) the IDP workflow was published at"
   value       = local.workflow_project_id != null ? "project" : local.workflow_organization_id != null ? "organization" : "account"
 }
+
+output "pipeline_access_resource_group_identifier" {
+  description = "The ID of the Resource Group targeting the pipeline, used to grant IDP workflow execution access"
+  value       = harness_platform_resource_group.pipeline_access.id
+}

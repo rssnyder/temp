@@ -14,6 +14,9 @@ This Template will create the following resources:
   (`workflow_organization_id`/`workflow_project_id`) is independent of the pipeline's own
   `organization_id`/`project_id` - the workflow can be published at the account level (or a
   different org/project) than wherever the pipeline itself lives.
+- A Resource Group, scoped to the pipeline's project and targeting only the pipeline itself, bound
+  via a Role Assignment to the built-in `_idp_workflow_executor` role for the account-level
+  `_account_all_users` group - so any user in the account can run the pipeline.
 
 ## Providers
 
@@ -123,6 +126,7 @@ used to construct your own `terraform.tfvars` file.
 | pipeline_executions_url | URL to the pipeline execution screen | string |
 | workflow_identifier | The ID of the created IDP workflow catalog entity | string |
 | workflow_scope | The Harness scope (account, organization or project) the IDP workflow was published at | string |
+| pipeline_access_resource_group_identifier | The ID of the Resource Group targeting the pipeline, used to grant IDP workflow execution access | string |
 
 ## Contributing
 
