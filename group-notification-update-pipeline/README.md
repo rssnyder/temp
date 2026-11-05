@@ -14,9 +14,13 @@ This Template will create the following resources:
   (`workflow_organization_id`/`workflow_project_id`) is independent of the pipeline's own
   `organization_id`/`project_id` - the workflow can be published at the account level (or a
   different org/project) than wherever the pipeline itself lives.
-- A Resource Group, scoped to the pipeline's project and targeting only the pipeline itself, bound
-  via a Role Assignment to the built-in `_idp_workflow_executor` role for the account-level
-  `_account_all_users` group - so any user in the account can run the pipeline.
+- A Resource Group, scoped to the pipeline's project and targeting only the pipeline itself and its
+  service account secret (see below), bound via a Role Assignment to the built-in
+  `_idp_workflow_executor` role for the account-level `_account_all_users` group - so any user in
+  the account can run the pipeline.
+- An account-level Service Account (API key/token) the pipeline authenticates as, granted only the
+  ability to edit user groups (via a dedicated custom Role and Resource Group covering account,
+  org and project scoped groups). Its API key is stored as a Secret in the pipeline's own project.
 
 ## Providers
 
@@ -54,8 +58,6 @@ terraform {
 The following items must be preconfigured in the target Harness Account
 
 - An existing Organization and Project
-- A Harness Secret containing an API key (PAT/SAT) with View and Manage permission on user groups
-  at every scope you intend to update
 - An existing Kubernetes connector (and namespace) the step group's pod can run on. There is no
   Cloud build infrastructure option for step groups outside of CI stages, so this is always
   required
@@ -75,7 +77,6 @@ connector._
 | organization_id | X | Provide an existing organization reference ID.  Must exist before execution | string ||
 | project_id | X | Provide an existing project reference ID.  Must exist before execution | string ||
 | pipeline_identifier | | Identifier of the created pipeline | string | update_group_notifications |
-| harness_api_key_secret_ref | X | Reference to an existing Harness Secret holding an API key with View and Manage permission on user groups | string ||
 | docker_connector_ref | | Docker registry connector used by the Run step to pull the SDK image | string | account.harnessImage |
 | sdk_image | | Image with harness-platform-sdk preinstalled, used by the Run step | string | harnesssolutionfactory/harness-platform-sdk:v1.1.0 |
 | allowed_notification_types | | Notification channel types offered to end users in the pipeline and operational workflow | list(string) | ["EMAIL", "SLACK", "PAGERDUTY", "MSTEAMS"] |
@@ -127,6 +128,8 @@ used to construct your own `terraform.tfvars` file.
 | workflow_identifier | The ID of the created IDP workflow catalog entity | string |
 | workflow_scope | The Harness scope (account, organization or project) the IDP workflow was published at | string |
 | pipeline_access_resource_group_identifier | The ID of the Resource Group targeting the pipeline, used to grant IDP workflow execution access | string |
+| notification_updater_service_account_identifier | The ID of the Service Account the pipeline authenticates as | string |
+| notification_updater_api_key_secret_identifier | The ID of the project-scoped Secret storing the Service Account's API key | string |
 
 ## Contributing
 

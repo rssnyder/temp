@@ -20,10 +20,6 @@ project_id = # Required
 # [Optional] Identifier of the created pipeline
 pipeline_identifier = "update_group_notifications"
 
-# [Required] Reference to an existing Harness Secret holding an API key (PAT/SAT) with View and
-# Manage permission on user groups at every scope you intend to update
-harness_api_key_secret_ref = # Required
-
 # [Optional] Docker registry connector used by the Run step to pull the SDK image
 docker_connector_ref = "account.harnessImage"
 

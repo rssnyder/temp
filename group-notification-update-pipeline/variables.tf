@@ -36,11 +36,6 @@ variable "pipeline_identifier" {
   default     = "update_group_notifications"
 }
 
-variable "harness_api_key_secret_ref" {
-  type        = string
-  description = "[Required] Reference to an existing Harness Secret holding an API key (PAT/SAT) with View and Manage permission on user groups at every scope you intend to update. Must be scope-qualified (e.g. account.harness_api_key, org.harness_api_key) or a bare identifier for a project secret"
-}
-
 variable "docker_connector_ref" {
   type        = string
   description = "[Optional] Docker registry connector used by the Run step to pull the SDK image (an anonymous Docker Hub connector works; the image is public). Must exist before execution"

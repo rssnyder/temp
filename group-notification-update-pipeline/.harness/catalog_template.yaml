@@ -71,17 +71,7 @@ spec:
           ui:field: HarnessProjectPicker
           default: Choose One
     - title: Pipeline Configuration
-      required:
-        - harness_api_key_secret_ref
       properties:
-        harness_api_key_secret_ref:
-          title: Harness API Key Secret Reference
-          description: |
-            ---
-            Reference to an existing Harness Secret holding an API key (PAT/SAT) with View and Manage permission on user groups at every scope you intend to update.
-
-            Must be scope-qualified (e.g. `account.harness_api_key`, `org.harness_api_key`) or a bare identifier for a project secret
-          type: string
         docker_connector_ref:
           title: Docker Connector Reference
           description: Docker registry connector used to pull the SDK image for the Run step (an anonymous Docker Hub connector works; the image is public)
@@ -363,7 +353,6 @@ spec:
               if parameters.deployment_scope == "custom"
               else "Solutions_Factory"
               }}
-            harness_api_key_secret_ref: ${{ parameters.harness_api_key_secret_ref }}
             docker_connector_ref: ${{ parameters.docker_connector_ref }}
             sdk_image: ${{ parameters.sdk_image }}
             allowed_notification_types: ${{ parameters.allowed_notification_types }}

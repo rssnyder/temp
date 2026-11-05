@@ -17,7 +17,7 @@ resource "harness_platform_pipeline" "update_group_notifications" {
 
       # Pipeline Inputs
       HARNESS_BASE_URL : local.harness_ui_base_url
-      API_KEY_SECRET_REF : var.harness_api_key_secret_ref
+      API_KEY_SECRET_REF : harness_platform_secret_text.notification_updater_api_key.id
       DOCKER_CONNECTOR_REF : var.docker_connector_ref
       SDK_IMAGE : var.sdk_image
       SCRIPT : file("${path.module}/scripts/update_user_groups.py")

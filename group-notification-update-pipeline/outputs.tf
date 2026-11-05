@@ -62,3 +62,13 @@ output "pipeline_access_resource_group_identifier" {
   description = "The ID of the Resource Group targeting the pipeline, used to grant IDP workflow execution access"
   value       = harness_platform_resource_group.pipeline_access.id
 }
+
+output "notification_updater_service_account_identifier" {
+  description = "The ID of the Service Account the pipeline authenticates as"
+  value       = harness_platform_service_account.notification_updater.identifier
+}
+
+output "notification_updater_api_key_secret_identifier" {
+  description = "The ID of the project-scoped Secret storing the Service Account's API key"
+  value       = harness_platform_secret_text.notification_updater_api_key.id
+}

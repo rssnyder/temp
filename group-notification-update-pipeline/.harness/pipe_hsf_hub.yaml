@@ -33,7 +33,6 @@ pipeline:
                     "harness_platform_account":"<+account.identifier>",
                     "organization_id": "<+pipeline.variables.organization_id>",
                     "project_id": "<+pipeline.variables.project_id>",
-                    "harness_api_key_secret_ref": "<+pipeline.variables.harness_api_key_secret_ref>",
                     "docker_connector_ref": "<+pipeline.variables.docker_connector_ref>",
                     "sdk_image": "<+pipeline.variables.sdk_image>",
                     "allowed_notification_types": ["<+pipeline.variables.allowed_notification_types.replace(',','\",\"')>"],
@@ -121,11 +120,6 @@ pipeline:
       required: true
       value: <+input>.regex(^([a-zA-Z][_a-zA-Z0-9]*)$)
     ## Pipeline Input Variables Controls
-    - name: harness_api_key_secret_ref
-      type: String
-      description: "[Required] Reference to a Harness Secret containing a Harness Platform API Key with View and Manage permission on user groups at every scope you intend to update"
-      required: true
-      value: <+input>.regex(^account.([a-zA-Z][_a-zA-Z0-9]*)$|org.([a-zA-Z][_a-zA-Z0-9]*)$|([a-zA-Z][_a-zA-Z0-9]*)$)
     - name: docker_connector_ref
       type: String
       description: "[Optional] Docker registry connector used to pull the SDK image for the Run step (an anonymous Docker Hub connector works; the image is public)"
