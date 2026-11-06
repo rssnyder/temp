@@ -143,9 +143,15 @@ def with_channel(group):
             return request, False
         value = NVALUE
 
-    entry = {"type": NTYPE, field: value}
+    entry = {"type": NTYPE}
     if NTYPE == "EMAIL":
+        # Omit groupEmail entirely when there are no addresses (e.g. the target is
+        # only every individual member of the group, no mailing-list address).
+        if value:
+            entry[field] = value
         entry["sendEmailToAllUsers"] = SEND_EMAIL_TO_ALL_USERS
+    else:
+        entry[field] = value
     request.notification_configs = [c for c in existing if c.get("type") != NTYPE] + [entry]
     return request, True
 
