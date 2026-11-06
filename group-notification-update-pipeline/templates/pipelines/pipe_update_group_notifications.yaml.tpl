@@ -18,9 +18,14 @@ pipeline:
       value: <+input>.allowedValues(${ALLOWED_NOTIFICATION_TYPES})
     - name: notification_value
       type: String
-      description: Group email address, Slack/Teams webhook URL, or PagerDuty key, matching the type
-      required: true
+      description: Group email address, Slack/Teams webhook URL, or PagerDuty key, matching the type. Optional for EMAIL when send_email_to_all_users is true
+      required: false
       value: <+input>
+    - name: send_email_to_all_users
+      type: String
+      description: EMAIL only - also send the notification to every individual member of the group, not just the addresses above
+      required: false
+      value: <+input>.default(false).selectOneFrom(true,false)
   stages:
     - stage:
         name: Update User Groups
@@ -69,6 +74,7 @@ pipeline:
                             USER_GROUPS: <+pipeline.variables.user_groups>
                             NOTIFICATION_TYPE: <+pipeline.variables.notification_type>
                             NOTIFICATION_VALUE: <+pipeline.variables.notification_value>
+                            SEND_EMAIL_TO_ALL_USERS: <+pipeline.variables.send_email_to_all_users>
                           outputVariables:
                             - name: UPDATED_GROUPS
                               type: String

@@ -2,7 +2,8 @@
 
 Runs inside the pipeline's Run step with harness-platform-sdk installed. Env vars:
   HARNESS_BASE_URL, HARNESS_API_KEY, ACCOUNT_ID, ORG_ID, PROJECT_ID,
-  USER_GROUPS (comma-separated), NOTIFICATION_TYPE, NOTIFICATION_VALUE
+  USER_GROUPS (comma-separated), NOTIFICATION_TYPE, NOTIFICATION_VALUE,
+  SEND_EMAIL_TO_ALL_USERS ("true"/"false", EMAIL only)
 
 Group scope is sensed per group:
   "account.<id>"  -> account-level group
@@ -17,9 +18,13 @@ The update API replaces the whole group, so the group is fetched and written
 back with only the entry of NOTIFICATION_TYPE changed; other channel types
 already on the group are kept. EMAIL is additive: the group's email list is
 comma-separated, new addresses are appended, and addresses already present
-(case-insensitive) are not added again. Every other type replaces its entry.
-A group that already has the requested value is left untouched (no write).
-Webhook URLs and keys are secrets and are never printed.
+(case-insensitive) are not added again. NOTIFICATION_VALUE may be empty for
+EMAIL when SEND_EMAIL_TO_ALL_USERS is "true" - this only (re)sets the "send to
+all members" flag without adding any address. Every other type replaces its
+entry and still requires NOTIFICATION_VALUE. A group that already has the
+requested value (and, for EMAIL, the requested SEND_EMAIL_TO_ALL_USERS flag)
+is left untouched (no write). Webhook URLs and keys are secrets and are never
+printed.
 
 Output variables (markdown links to the groups in the Harness UI):
   UPDATED_GROUPS    groups that were modified
@@ -39,6 +44,7 @@ ORG = os.environ["ORG_ID"]
 PROJECT = os.environ["PROJECT_ID"]
 NTYPE = os.environ["NOTIFICATION_TYPE"]
 NVALUE = os.environ["NOTIFICATION_VALUE"]
+SEND_EMAIL_TO_ALL_USERS = os.environ.get("SEND_EMAIL_TO_ALL_USERS", "false").strip().lower() == "true"
 GROUPS = [g.strip() for g in os.environ["USER_GROUPS"].split(",") if g.strip()]
 
 # Config key that carries the target for each channel type.
@@ -128,7 +134,8 @@ def with_channel(group):
             if email and email.lower() not in known:
                 known.add(email.lower())
                 added.append(email)
-        if not added:
+        prior_send_all = bool(prior.get("sendEmailToAllUsers", False))
+        if not added and SEND_EMAIL_TO_ALL_USERS == prior_send_all:
             return request, False
         value = ",".join(current + added)
     else:
@@ -138,8 +145,7 @@ def with_channel(group):
 
     entry = {"type": NTYPE, field: value}
     if NTYPE == "EMAIL":
-        # Keep the group's existing "email all members" choice.
-        entry["sendEmailToAllUsers"] = bool(prior.get("sendEmailToAllUsers", False))
+        entry["sendEmailToAllUsers"] = SEND_EMAIL_TO_ALL_USERS
     request.notification_configs = [c for c in existing if c.get("type") != NTYPE] + [entry]
     return request, True
 
@@ -178,7 +184,7 @@ def update(ref):
 def main():
     if NTYPE not in VALUE_FIELD:
         sys.exit(f"ERROR: unsupported notification type '{NTYPE}'")
-    if not NVALUE:
+    if not NVALUE and not (NTYPE == "EMAIL" and SEND_EMAIL_TO_ALL_USERS):
         sys.exit("ERROR: notification value is empty")
     if not GROUPS:
         sys.exit("ERROR: no user groups given")

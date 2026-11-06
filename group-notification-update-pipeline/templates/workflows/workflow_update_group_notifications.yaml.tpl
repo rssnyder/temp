@@ -46,7 +46,6 @@ spec:
     - title: Notification Channel
       required:
         - notification_type
-        - notification_value
       properties:
         notification_type:
           title: Notification Type
@@ -62,8 +61,13 @@ spec:
           %{~ endfor ~}
         notification_value:
           title: Notification Target
-          description: Email address for Email, webhook URL for Slack or Microsoft Teams, integration key for PagerDuty.
+          description: Email address for Email, webhook URL for Slack or Microsoft Teams, integration key for PagerDuty. Optional for Email if "Send email to individual users in the group" is checked below
           type: string
+        send_email_to_all_users:
+          title: Send email to individual users in the group
+          description: Email only. In addition to any addresses above, also email every individual member of the group
+          type: boolean
+          default: false
   steps:
     - id: trigger
       name: Update group notifications
@@ -73,6 +77,7 @@ spec:
         inputset:
           user_groups: $${{ parameters.user_groups | join(',') }}
           notification_type: $${{ parameters.notification_type }}
-          notification_value: $${{ parameters.notification_value }}
+          notification_value: $${{ parameters.notification_value | default('') }}
+          send_email_to_all_users: $${{ parameters.send_email_to_all_users }}
         apikey: $${{ parameters.token }}
         showOutputVariables: true
