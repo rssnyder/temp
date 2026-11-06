@@ -78,6 +78,6 @@ spec:
           user_groups: $${{ parameters.user_groups | join(',') }}
           notification_type: $${{ parameters.notification_type }}
           notification_value: $${{ parameters.notification_value | default('') }}
-          send_email_to_all_users: "$${{ parameters.send_email_to_all_users }}"
+          send_email_to_all_users: $${{ parameters.send_email_to_all_users | string }}
         apikey: $${{ parameters.token }}
         showOutputVariables: true

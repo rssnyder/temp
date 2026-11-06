@@ -43,7 +43,7 @@ ACCOUNT = os.environ["ACCOUNT_ID"]
 ORG = os.environ["ORG_ID"]
 PROJECT = os.environ["PROJECT_ID"]
 NTYPE = os.environ["NOTIFICATION_TYPE"]
-NVALUE = os.environ["NOTIFICATION_VALUE"]
+NVALUE = os.environ.get("NOTIFICATION_VALUE", "")
 SEND_EMAIL_TO_ALL_USERS = os.environ.get("SEND_EMAIL_TO_ALL_USERS", "false").strip().lower() == "true"
 GROUPS = [g.strip() for g in os.environ["USER_GROUPS"].split(",") if g.strip()]
 
