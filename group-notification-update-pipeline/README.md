@@ -19,8 +19,9 @@ This Template will create the following resources:
   `_idp_workflow_executor` role for the account-level `_account_all_users` group - so any user in
   the account can run the pipeline.
 - An account-level Service Account (API key/token) the pipeline authenticates as, granted only the
-  ability to edit user groups (via a dedicated custom Role and Resource Group covering account,
-  org and project scoped groups). Its API key is stored as a Secret in the pipeline's own project.
+  ability to view and edit user groups (via a dedicated custom Role and Resource Group covering
+  account, org and project scoped groups). Its API key is stored as a Secret in the pipeline's own
+  project.
 
 ## Providers
 

@@ -1,9 +1,9 @@
 ####################
 # Account-level Service Account the pipeline's Run step authenticates as to
-# update user groups. Granted only the ability to edit user groups (no other
-# permissions), scoped across the whole account hierarchy so it can update
-# account, org and project level groups - matching the update script's own
-# scope support.
+# update user groups. Granted only the ability to view and edit user groups (no
+# other permissions), scoped across the whole account hierarchy so it can
+# update account, org and project level groups - matching the update script's
+# own scope support.
 #
 # NOTE: "core_usergroup_manage" is the most specific Harness permission
 # identifier available for editing user groups - as far as could be verified,
@@ -43,8 +43,8 @@ resource "harness_platform_token" "notification_updater" {
 resource "harness_platform_roles" "usergroup_editor" {
   identifier           = "${var.pipeline_identifier}_usergroup_editor"
   name                 = "Update Group Notifications User Group Editor"
-  description          = "Grants only the ability to edit user groups, for the Update Group Notifications service account"
-  permissions          = ["core_usergroup_manage"]
+  description          = "Grants only the ability to view and edit user groups, for the Update Group Notifications service account"
+  permissions          = ["core_usergroup_view", "core_usergroup_manage"]
   allowed_scope_levels = ["account"]
   tags                 = local.common_tags_tuple
 }
