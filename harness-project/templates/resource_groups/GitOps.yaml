@@ -1,0 +1,19 @@
+---
+########################
+# Harness Resource Group Management
+#
+# The ResourceGroup name
+# When creating a new Harness ResourceGroup, the following is used:
+# - name = The name of this file. Hyphens and underscores are converted into spaces
+# - identifier = The name of this file. Hyphens and spaces are converted into underscores
+########################
+include_child_scopes: false
+resource_filters:
+  - type: GITOPS_APPLICATIONSET
+  - type: GITOPS_CLUSTER
+  - type: GITOPS_AGENT
+  - type: GITOPS_CERT
+  - type: GITOPS_ARGOPROJECT
+  - type: GITOPS_GPGKEY
+  - type: GITOPS_APP
+  - type: GITOPS_REPOSITORY
